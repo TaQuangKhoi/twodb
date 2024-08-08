@@ -14,6 +14,16 @@ fn main() {
         &[],
     ).unwrap();
 
+    let first_row = rows.get(0);
+    match first_row {
+        Some(row) => {
+            println!("First row: {}", row_to_string(row.clone()));
+        },
+        None => {
+            println!("No first rows found");
+        }
+    }
+
     for row in rows {
         println!("{}", row_to_string(row));
     }
