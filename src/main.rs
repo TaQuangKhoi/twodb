@@ -1,8 +1,14 @@
 use postgres::{Client, Error, NoTls};
 
 fn main() {
-    let mut client = connect().unwrap();
-    let query = "___YOUR_QUERY_HERE___";
+    let mut client = match connect() {
+        Ok(client) => client,
+        Err(err) => {
+            println!("Error: {}", err);
+            return;
+        }
+    };
+let query = "___YOUR_QUERY_HERE___";
     let rows = client.query(
         query,
         &[],
@@ -13,21 +19,24 @@ fn main() {
         let name: Option<&str> = row.try_get(1).unwrap_or(None);
         let email: Option<&str> = row.try_get(2).unwrap_or(None);
 
-        let mut raw_id: i64 = None.unwrap_or(0);
-        let mut raw_name: &str = None.unwrap_or("None");
-        let mut raw_email: &str = None.unwrap_or("None");
+        let raw_id: i64;
         match id {
             Some(id) => raw_id = id,
             None => raw_id = 0,
         }
+
+        let raw_name: &str;
         match name {
             Some(name) => raw_name = name,
             None => raw_name = "None",
         }
+
+        let raw_email: &str;
         match email {
             Some(email) => raw_email = email,
             None => raw_email = "None",
         }
+
         println!("id: {}, name: {}, email: {}", raw_id, raw_name, raw_email)
     }
 }
