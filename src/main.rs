@@ -8,7 +8,7 @@ fn main() {
             return;
         }
     };
-let query = "___YOUR_QUERY_HERE___";
+    let query = "___YOUR_QUERY_HERE___";
     let rows = client.query(
         query,
         &[],
