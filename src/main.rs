@@ -14,45 +14,30 @@ fn main() {
         &[],
     ).unwrap();
 
-    let first_row = rows.get(0);
-    match first_row {
-        Some(row) => {
-            println!("First row: {}", row_to_string(row.clone()));
-        },
-        None => {
-            println!("No first rows found");
-        }
-    }
-
     for row in rows {
         println!("{}", row_to_string(row));
     }
 }
 
 fn row_to_string(row: postgres::Row) -> String {
-    let id: Option<i64> = row.try_get(0).unwrap_or(None); // bigserial
-    let name: Option<&str> = row.try_get(1).unwrap_or(None);
-    let email: Option<&str> = row.try_get(2).unwrap_or(None);
+    let columns = row.columns();
+    let cells: Vec<String> = columns.iter().map(|column| {
+        let name = column.name();
+        let type_ = column.type_();
+        println!("{}: {:?}", name, type_);
+        match type_ {
+            INT8 => {
+                let value: Option<i64> = row.try_get(name).unwrap_or(None);
+                format!("{}: {}", name, value.unwrap_or(0))
+            }
+            Varchar => {
+                let value: Option<&str> = row.try_get(name).unwrap_or(None);
+                format!("{}: {}", name, value.unwrap_or("None"))
+            }
+        }
+    }).collect();
 
-    let raw_id: i64;
-    match id {
-        Some(id) => raw_id = id,
-        None => raw_id = 0,
-    }
-
-    let raw_name: &str;
-    match name {
-        Some(name) => raw_name = name,
-        None => raw_name = "None",
-    }
-
-    let raw_email: &str;
-    match email {
-        Some(email) => raw_email = email,
-        None => raw_email = "None",
-    }
-
-    format!("id: {}, name: {}, email: {}", raw_id, raw_name, raw_email)
+    format!("{:?}", cells)
 }
 
 fn connect() -> Result<Client, Error> {
