@@ -15,30 +15,34 @@ fn main() {
     ).unwrap();
 
     for row in rows {
-        let id: Option<i64> = row.try_get(0).unwrap_or(None); // bigserial
-        let name: Option<&str> = row.try_get(1).unwrap_or(None);
-        let email: Option<&str> = row.try_get(2).unwrap_or(None);
-
-        let raw_id: i64;
-        match id {
-            Some(id) => raw_id = id,
-            None => raw_id = 0,
-        }
-
-        let raw_name: &str;
-        match name {
-            Some(name) => raw_name = name,
-            None => raw_name = "None",
-        }
-
-        let raw_email: &str;
-        match email {
-            Some(email) => raw_email = email,
-            None => raw_email = "None",
-        }
-
-        println!("id: {}, name: {}, email: {}", raw_id, raw_name, raw_email)
+        println!("{}", row_to_string(row));
     }
+}
+
+fn row_to_string(row: postgres::Row) -> String {
+    let id: Option<i64> = row.try_get(0).unwrap_or(None); // bigserial
+    let name: Option<&str> = row.try_get(1).unwrap_or(None);
+    let email: Option<&str> = row.try_get(2).unwrap_or(None);
+
+    let raw_id: i64;
+    match id {
+        Some(id) => raw_id = id,
+        None => raw_id = 0,
+    }
+
+    let raw_name: &str;
+    match name {
+        Some(name) => raw_name = name,
+        None => raw_name = "None",
+    }
+
+    let raw_email: &str;
+    match email {
+        Some(email) => raw_email = email,
+        None => raw_email = "None",
+    }
+
+    format!("id: {}, name: {}, email: {}", raw_id, raw_name, raw_email)
 }
 
 fn connect() -> Result<Client, Error> {
