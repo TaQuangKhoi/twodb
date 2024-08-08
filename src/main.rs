@@ -1,4 +1,5 @@
 use postgres::{Client, Error, NoTls};
+use std::env::var;
 
 fn main() {
     let mut client = match connect() {
@@ -8,9 +9,11 @@ fn main() {
             return;
         }
     };
-    let query = "___YOUR_QUERY_HERE___";
+
+    let table_name = var("TABLE_NAME").unwrap_or(String::from(""));
+    let query = "SELECT * FROM ".to_string() + table_name.as_str();
     let rows = client.query(
-        query,
+        &query,
         &[],
     ).unwrap();
 
@@ -24,13 +27,12 @@ fn row_to_string(row: postgres::Row) -> String {
     let cells: Vec<String> = columns.iter().map(|column| {
         let name = column.name();
         let type_ = column.type_();
-        println!("{}: {:?}", name, type_);
         match type_ {
-            INT8 => {
+            int8 => {
                 let value: Option<i64> = row.try_get(name).unwrap_or(None);
                 format!("{}: {}", name, value.unwrap_or(0))
             }
-            Varchar => {
+            varchar => {
                 let value: Option<&str> = row.try_get(name).unwrap_or(None);
                 format!("{}: {}", name, value.unwrap_or("None"))
             }
@@ -41,10 +43,11 @@ fn row_to_string(row: postgres::Row) -> String {
 }
 
 fn connect() -> Result<Client, Error> {
-    let database_name = String::from("");
-    let username = String::from("");
-    let password = String::from("");
-    let host = String::from("");
+    let database_name = var("POSTGRES_DB").unwrap_or(String::from(""));
+    let username = var("POSTGRES_USER").unwrap_or(String::from(""));
+    let password = var("POSTGRES_PASSWORD").unwrap_or(String::from(""));
+    let host = var("POSTGRES_HOST").unwrap_or(String::from(""));
+
     let database_url = format!("postgresql://{}:{}@{}/{}", username, password, host, database_name);
 
     let client = Client::connect(
