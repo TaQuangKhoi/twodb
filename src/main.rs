@@ -68,7 +68,7 @@ fn get_clean_tables(database_name: String) {
         };
 
         // check if table exists
-        if !check_table_exists(&conn, table.name.clone()) {
+        if is_table_exists(&conn, table.name.clone()) {
             continue;
         }
 
@@ -76,11 +76,11 @@ fn get_clean_tables(database_name: String) {
     }
 }
 
-fn check_table_exists(conn: &Connection, table_name: String) -> bool {
+fn is_table_exists(conn: &Connection, table_name: String) -> bool {
     let mut stmt = conn.prepare("SELECT id FROM tables WHERE name = ?1").unwrap();
     let mut rows = stmt.query(params![table_name]).unwrap();
 
-    rows.next().unwrap_or(None).is_none()
+    rows.next().unwrap_or(None).is_none() == false
 }
 
 fn insert_new_table(conn: &Connection, table: Table) {
