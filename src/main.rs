@@ -3,7 +3,17 @@ use std::env::var;
 use std::time::SystemTime;
 
 fn main() {
-    let mut client = match connect() {
+    let first_database_name = var("POSTGRES_DB_1").unwrap_or(String::from(""));
+    let second_database_name = var("POSTGRES_DB_2").unwrap_or(String::from(""));
+
+    run_database(first_database_name);
+    run_database(second_database_name);
+}
+
+fn run_database(database_name: String) {
+    println!("Database: {}", database_name);
+
+    let mut client = match connect(database_name) {
         Ok(client) => client,
         Err(err) => {
             println!("Error: {}", err);
@@ -21,6 +31,8 @@ fn main() {
     for row in rows {
         println!("{}", row_to_string(row));
     }
+
+    client.close().unwrap();
 }
 
 fn row_to_string(row: postgres::Row) -> String {
@@ -56,8 +68,7 @@ fn row_to_string(row: postgres::Row) -> String {
     format!("{:?}", cells)
 }
 
-fn connect() -> Result<Client, Error> {
-    let database_name = var("POSTGRES_DB").unwrap_or(String::from(""));
+fn connect(database_name: String) -> Result<Client, Error> {
     let username = var("POSTGRES_USER").unwrap_or(String::from(""));
     let password = var("POSTGRES_PASSWORD").unwrap_or(String::from(""));
     let host = var("POSTGRES_HOST").unwrap_or(String::from(""));
