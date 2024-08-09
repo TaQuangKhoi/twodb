@@ -3,10 +3,10 @@ use std::env::var;
 use std::time::SystemTime;
 
 fn main() {
-    let first_database_name = var("POSTGRES_DB_1").unwrap_or(String::from(""));
-    let second_database_name = var("POSTGRES_DB_2").unwrap_or(String::from(""));
+    let source_database_name = var("POSTGRES_DB_1").unwrap_or(String::from(""));
+    let target_database_name = var("POSTGRES_DB_2").unwrap_or(String::from(""));
 
-    get_clean_tables(first_database_name);
+    get_clean_tables(source_database_name);
 }
 
 fn get_clean_tables(database_name: String) {
