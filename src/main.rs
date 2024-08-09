@@ -1,5 +1,6 @@
 use postgres::{Client, Error, NoTls};
 use std::env::var;
+use std::time::SystemTime;
 
 fn main() {
     let mut client = match connect() {
@@ -39,6 +40,11 @@ fn row_to_string(row: postgres::Row) -> String {
             "bool" => {
                 let value: Option<bool> = row.try_get(name).unwrap_or(None);
                 format!("{}: {}", name, value.unwrap_or(false))
+            }
+            "timestamp" => {
+                let value: Option<SystemTime> = row.try_get(name).unwrap_or(None);
+                format!("{}: {}", name, value.unwrap_or(SystemTime::UNIX_EPOCH)
+                    .duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs())
             }
             _ => {
                 println!("Unknown type: {:?}", type_.name());
