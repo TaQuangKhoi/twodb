@@ -68,20 +68,30 @@ fn get_clean_tables(database_name: String) {
         };
 
         // check if table exists
-        let mut stmt = conn.prepare("SELECT id FROM tables WHERE name = ?1").unwrap();
-        let mut rows = stmt.query(params![table.name]).unwrap();
-
-        if rows.next().unwrap_or(None).is_none() {
-            conn.execute(
-                "INSERT INTO tables (name, table_type , export_complexity_type, database, export_order)
-                    VALUES (?1, ?2, ?3, ?4, ?5)",
-                params![
-                    table.name, table.table_type, table.export_complexity_type,
-                    table.database, table.export_order
-                ],
-            ).unwrap();
+        if !check_table_exists(&conn, table.name.clone()) {
+            continue;
         }
+
+        insert_new_table(&conn, table);
     }
+}
+
+fn check_table_exists(conn: &Connection, table_name: String) -> bool {
+    let mut stmt = conn.prepare("SELECT id FROM tables WHERE name = ?1").unwrap();
+    let mut rows = stmt.query(params![table_name]).unwrap();
+
+    rows.next().unwrap_or(None).is_none()
+}
+
+fn insert_new_table(conn: &Connection, table: Table) {
+    conn.execute(
+        "INSERT INTO tables (name, table_type , export_complexity_type, database, export_order)
+            VALUES (?1, ?2, ?3, ?4, ?5)",
+        params![
+            table.name, table.table_type, table.export_complexity_type,
+            table.database, table.export_order
+        ],
+    ).unwrap();
 }
 
 fn get_all_tables(database_name: String) {
