@@ -6,7 +6,30 @@ fn main() {
     let first_database_name = var("POSTGRES_DB_1").unwrap_or(String::from(""));
     let second_database_name = var("POSTGRES_DB_2").unwrap_or(String::from(""));
 
-    get_all_tables(first_database_name);
+    get_clean_tables(first_database_name);
+}
+
+fn get_clean_tables(database_name: String) {
+    let mut client = connect(database_name).unwrap();
+    let query ="SELECT table_name \
+        FROM information_schema.tables \
+        WHERE table_schema = 'public' \
+        AND table_type = 'BASE TABLE' \
+        AND table_name NOT IN ( \
+            SELECT DISTINCT table_name \
+            FROM information_schema.table_constraints \
+            WHERE constraint_type = 'FOREIGN KEY' \
+            AND table_schema = 'public' \
+        );".to_string();
+
+    let rows = client.query(
+        &query,
+        &[],
+    ).unwrap();
+
+    for row in rows {
+        println!("{}", row_to_string(row));
+    }
 }
 
 fn get_all_tables(database_name: String) {
