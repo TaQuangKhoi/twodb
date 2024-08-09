@@ -4,10 +4,8 @@ use std::time::SystemTime;
 use rusqlite::{params, Connection, Result};
 
 fn main() {
-    let source_database_name = var("POSTGRES_DB_1").unwrap_or(String::from(""));
+    prepare_knowledge();
     let target_database_name = var("POSTGRES_DB_2").unwrap_or(String::from(""));
-
-    get_clean_tables(source_database_name);
 }
 
 struct Table {
@@ -15,10 +13,16 @@ struct Table {
     name: String,
     table_type: String,
     export_complexity_type: String,
+    database: String,
+}
+
+fn prepare_knowledge() {
+    let source_database_name = var("POSTGRES_DB_1").unwrap_or(String::from(""));
+    get_clean_tables(source_database_name);
 }
 
 fn get_clean_tables(database_name: String) {
-    let mut client = connect(database_name).unwrap();
+    let mut client = connect(database_name.clone()).unwrap();
     let query = "SELECT table_name \
         FROM information_schema.tables \
         WHERE table_schema = 'public' \
@@ -41,7 +45,8 @@ fn get_clean_tables(database_name: String) {
             id INTEGER PRIMARY KEY,
             name TEXT NOT NULL,
             table_type TEXT NOT NULL,
-            export_complexity_type TEXT NOT NULL
+            export_complexity_type TEXT NOT NULL,
+            database TEXT NOT NULL
         )",
         params![],
     ).unwrap();
@@ -52,6 +57,7 @@ fn get_clean_tables(database_name: String) {
             name: row.get(0),
             table_type: String::from("BASE TABLE"),
             export_complexity_type: "SIMPLE".to_string(),
+            database: database_name.clone(),
         };
 
         // check if table exists
@@ -60,8 +66,12 @@ fn get_clean_tables(database_name: String) {
 
         if rows.next().unwrap_or(None).is_none() {
             conn.execute(
-                "INSERT INTO tables (name, table_type , export_complexity_type) VALUES (?1, ?2, ?3)",
-                params![table.name, table.table_type, table.export_complexity_type],
+                "INSERT INTO tables (name, table_type , export_complexity_type, database)
+                    VALUES (?1, ?2, ?3, ?4)",
+                params![
+                    table.name, table.table_type, table.export_complexity_type,
+                    table.database
+                ],
             ).unwrap();
         }
     }
