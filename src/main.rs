@@ -5,7 +5,8 @@ use rusqlite::{params, Connection, Result};
 
 fn main() {
     prepare_knowledge();
-    let target_database_name = var("POSTGRES_DB_2").unwrap_or(String::from(""));
+
+    // export based on complexity
 }
 
 struct Table {
@@ -14,11 +15,15 @@ struct Table {
     table_type: String,
     export_complexity_type: String,
     database: String,
+    export_order: i32,
 }
 
 fn prepare_knowledge() {
     let source_database_name = var("POSTGRES_DB_1").unwrap_or(String::from(""));
-    get_clean_tables(source_database_name);
+    get_clean_tables(source_database_name.clone());
+
+    let target_database_name = var("POSTGRES_DB_2").unwrap_or(String::from(""));
+    get_clean_tables(target_database_name.clone());
 }
 
 fn get_clean_tables(database_name: String) {
@@ -46,7 +51,8 @@ fn get_clean_tables(database_name: String) {
             name TEXT NOT NULL,
             table_type TEXT NOT NULL,
             export_complexity_type TEXT NOT NULL,
-            database TEXT NOT NULL
+            database TEXT NOT NULL,
+            export_order INTEGER NOT NULL
         )",
         params![],
     ).unwrap();
@@ -58,6 +64,7 @@ fn get_clean_tables(database_name: String) {
             table_type: String::from("BASE TABLE"),
             export_complexity_type: "SIMPLE".to_string(),
             database: database_name.clone(),
+            export_order: 0,
         };
 
         // check if table exists
@@ -66,11 +73,11 @@ fn get_clean_tables(database_name: String) {
 
         if rows.next().unwrap_or(None).is_none() {
             conn.execute(
-                "INSERT INTO tables (name, table_type , export_complexity_type, database)
-                    VALUES (?1, ?2, ?3, ?4)",
+                "INSERT INTO tables (name, table_type , export_complexity_type, database, export_order)
+                    VALUES (?1, ?2, ?3, ?4, ?5)",
                 params![
                     table.name, table.table_type, table.export_complexity_type,
-                    table.database
+                    table.database, table.export_order
                 ],
             ).unwrap();
         }
@@ -108,8 +115,6 @@ fn get_all_tables(database_name: String) {
 }
 
 fn run_database(database_name: String) {
-    println!("Database: {}", database_name);
-
     let mut client = match connect(database_name) {
         Ok(client) => client,
         Err(err) => {
