@@ -27,14 +27,22 @@ fn row_to_string(row: postgres::Row) -> String {
     let cells: Vec<String> = columns.iter().map(|column| {
         let name = column.name();
         let type_ = column.type_();
-        match type_ {
-            int8 => {
+        match type_.name() {
+            "int8" => {
                 let value: Option<i64> = row.try_get(name).unwrap_or(None);
                 format!("{}: {}", name, value.unwrap_or(0))
             }
-            varchar => {
+            "varchar" => {
                 let value: Option<&str> = row.try_get(name).unwrap_or(None);
                 format!("{}: {}", name, value.unwrap_or("None"))
+            }
+            "bool" => {
+                let value: Option<bool> = row.try_get(name).unwrap_or(None);
+                format!("{}: {}", name, value.unwrap_or(false))
+            }
+            _ => {
+                println!("Unknown type: {:?}", type_.name());
+                format!("{}: {}", name, "Unknown")
             }
         }
     }).collect();
