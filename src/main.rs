@@ -20,13 +20,13 @@ struct Table {
 
 fn prepare_knowledge() {
     let source_database_name = var("POSTGRES_DB_1").unwrap_or(String::from(""));
-    get_clean_tables(source_database_name.clone());
+    get_clean_tables(&source_database_name);
 
     let target_database_name = var("POSTGRES_DB_2").unwrap_or(String::from(""));
-    get_clean_tables(target_database_name.clone());
+    get_clean_tables(&target_database_name);
 }
 
-fn get_clean_tables(database_name: String) {
+fn get_clean_tables(database_name: &String) {
     let mut client = connect(database_name.clone()).unwrap();
     let query = "SELECT table_name \
         FROM information_schema.tables \
@@ -58,14 +58,7 @@ fn get_clean_tables(database_name: String) {
     ).unwrap();
 
     for row in rows {
-        let table = Table {
-            id: 0,
-            name: row.get(0),
-            table_type: String::from("BASE TABLE"),
-            export_complexity_type: "SIMPLE".to_string(),
-            database: database_name.clone(),
-            export_order: 0,
-        };
+        let table = build_base_simple_table(row.get(0), database_name.clone());
 
         // check if table exists
         if is_table_exists(&conn, table.name.clone()) {
@@ -73,6 +66,17 @@ fn get_clean_tables(database_name: String) {
         }
 
         insert_new_table(&conn, table);
+    }
+}
+
+fn build_base_simple_table(name: String, database: String) -> Table {
+    Table {
+        id: 0,
+        name,
+        table_type: String::from("BASE TABLE"),
+        export_complexity_type: String::from("SIMPLE"),
+        database,
+        export_order: 0,
     }
 }
 
@@ -120,7 +124,7 @@ fn get_all_tables(database_name: String) {
     println!("Total base tables: {}", base_tables.len());
 
     for row in rows {
-        println!("{}", row_to_string(row));
+        println!("{}", _row_to_string(row));
     }
 }
 
@@ -141,13 +145,13 @@ fn run_database(database_name: String) {
     ).unwrap();
 
     for row in rows {
-        println!("{}", row_to_string(row));
+        println!("{}", _row_to_string(row));
     }
 
     client.close().unwrap();
 }
 
-fn row_to_string(row: postgres::Row) -> String {
+fn _row_to_string(row: postgres::Row) -> String {
     let columns = row.columns();
     let cells: Vec<String> = columns.iter().map(|column| {
         let name = column.name();
