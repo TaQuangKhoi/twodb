@@ -9,13 +9,34 @@ fn main() {
     // export based on complexity
 }
 
+#[derive(Debug)]
 struct Table {
     id: i32,
     name: String,
     table_type: String,
-    export_complexity_type: String,
+    export_complexity_type: ExportComplexityType,
     database: String,
     export_order: i32,
+}
+
+#[derive(Debug)]
+enum ExportComplexityType {
+    SIMPLE,
+    COMPLEX,
+}
+impl ExportComplexityType {
+    fn name(&self) -> &str {
+        match self {
+            ExportComplexityType::SIMPLE => "SIMPLE",
+            ExportComplexityType::COMPLEX => "COMPLEX",
+        }
+    }
+}
+
+impl Table {
+    fn increase_export_order(&mut self) {
+        self.export_order += 1;
+    }
 }
 
 fn prepare_knowledge() {
@@ -70,14 +91,16 @@ fn get_clean_tables(database_name: &String) {
 }
 
 fn build_base_simple_table(name: String, database: String) -> Table {
-    Table {
+    let new_table = Table {
         id: 0,
         name,
         table_type: String::from("BASE TABLE"),
-        export_complexity_type: String::from("SIMPLE"),
+        export_complexity_type: ExportComplexityType::SIMPLE,
         database,
         export_order: 0,
-    }
+    };
+    println!("{:?}", new_table);
+    new_table
 }
 
 fn is_table_exists(conn: &Connection, table_name: String) -> bool {
@@ -92,7 +115,7 @@ fn insert_new_table(conn: &Connection, table: Table) {
         "INSERT INTO tables (name, table_type , export_complexity_type, database, export_order)
             VALUES (?1, ?2, ?3, ?4, ?5)",
         params![
-            table.name, table.table_type, table.export_complexity_type,
+            table.name, table.table_type, table.export_complexity_type.name(),
             table.database, table.export_order
         ],
     ).unwrap();
