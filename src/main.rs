@@ -13,10 +13,24 @@ fn main() {
 struct Table {
     id: i32,
     name: String,
-    table_type: String,
+    table_type: TableType,
     export_complexity_type: ExportComplexityType,
     database: String,
     export_order: i32,
+}
+
+#[derive(Debug)]
+enum TableType {
+    BaseTable,
+    VIEW,
+}
+impl TableType {
+    fn name(&self) -> &str {
+        match self {
+            TableType::BaseTable => "BASE TABLE",
+            TableType::VIEW => "VIEW",
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -94,7 +108,7 @@ fn build_base_simple_table(name: String, database: String) -> Table {
     let new_table = Table {
         id: 0,
         name,
-        table_type: String::from("BASE TABLE"),
+        table_type: TableType::BaseTable,
         export_complexity_type: ExportComplexityType::SIMPLE,
         database,
         export_order: 0,
@@ -115,7 +129,9 @@ fn insert_new_table(conn: &Connection, table: Table) {
         "INSERT INTO tables (name, table_type , export_complexity_type, database, export_order)
             VALUES (?1, ?2, ?3, ?4, ?5)",
         params![
-            table.name, table.table_type, table.export_complexity_type.name(),
+            table.name,
+            table.table_type.name(),
+            table.export_complexity_type.name(),
             table.database, table.export_order
         ],
     ).unwrap();
