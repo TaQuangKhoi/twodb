@@ -1,8 +1,14 @@
+/**
+ * This file contains the core logic of the application.
+ */
+
 use rusqlite::{Connection, params};
 use crate::table::{ExportComplexityType, Table, TableType, BASE_TABLE_STR};
 
 pub fn get_tables(conn: &Connection) -> Vec<Table> {
-    let mut stmt = conn.prepare("SELECT id, name, table_type, export_complexity_type, database, export_order FROM tables").unwrap();
+    let mut stmt = conn.prepare(
+        "SELECT id, name, table_type, export_complexity_type, database, export_order FROM tables"
+    ).unwrap();
     let tables = stmt.query_map(params![], |row| {
         Ok(Table {
             id: row.get(0)?,

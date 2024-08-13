@@ -1,7 +1,9 @@
 use std::env::var;
 use std::time::SystemTime;
+use rusqlite::{Connection, params};
 use crate::_row_to_string;
 use crate::database::connect;
+use crate::table::{build_base_simple_table, create_tables_table, insert_new_table};
 
 pub fn get_cells(row: &postgres::Row) -> Vec<String> {
     let columns = row.columns();
@@ -68,6 +70,45 @@ fn get_all_tables(database_name: String) {
     for row in rows {
         println!("{}", _row_to_string(&row));
     }
+}
+pub fn get_clean_tables(database_name: &String) {
+    let mut client = connect(database_name.clone()).unwrap();
+    let query = "SELECT table_name \
+        FROM information_schema.tables \
+        WHERE table_schema = 'public' \
+        AND table_type = 'BASE TABLE' \
+        AND table_name NOT IN ( \
+            SELECT DISTINCT table_name \
+            FROM information_schema.table_constraints \
+            WHERE constraint_type = 'FOREIGN KEY' \
+            AND table_schema = 'public' \
+        );".to_string();
+
+    let rows = client.query(
+        &query,
+        &[],
+    ).unwrap();
+
+    let conn = Connection::open("twodb.db").unwrap();
+    create_tables_table(&conn);
+
+    for row in rows {
+        let table = build_base_simple_table(row.get(0), database_name.clone());
+
+        // check if table exists
+        if is_table_exists(&conn, table.name.clone()) {
+            continue;
+        }
+
+        insert_new_table(&conn, table);
+    }
+    conn.close().unwrap();
+}
+fn is_table_exists(conn: &Connection, table_name: String) -> bool {
+    let mut stmt = conn.prepare("SELECT id FROM tables WHERE name = ?1").unwrap();
+    let mut rows = stmt.query(params![table_name]).unwrap();
+
+    rows.next().unwrap_or(None).is_none() == false
 }
 
 fn run_database(database_name: String) {
