@@ -1,7 +1,9 @@
-use postgres::{Client, Error, NoTls};
+pub mod database;
+
+use database::connect;
 use std::env::var;
 use std::time::SystemTime;
-use rusqlite::{params, Connection, Result};
+use rusqlite::{params, Connection};
 
 fn main() {
     prepare_knowledge();
@@ -113,7 +115,6 @@ fn build_base_simple_table(name: String, database: String) -> Table {
         database,
         export_order: 0,
     };
-    println!("{:?}", new_table);
     new_table
 }
 
@@ -221,24 +222,4 @@ fn _row_to_string(row: postgres::Row) -> String {
     }).collect();
 
     format!("{:?}", cells)
-}
-
-/**
- * Connect to the database
- *
- * Author : Ta Quang Khoi
- */
-fn connect(database_name: String) -> Result<Client, Error> {
-    let username = var("POSTGRES_USER").unwrap_or(String::from(""));
-    let password = var("POSTGRES_PASSWORD").unwrap_or(String::from(""));
-    let host = var("POSTGRES_HOST").unwrap_or(String::from(""));
-
-    let database_url = format!("postgresql://{}:{}@{}/{}", username, password, host, database_name);
-
-    let client = Client::connect(
-        database_url.as_str(),
-        NoTls,
-    )?;
-
-    Ok(client)
 }
