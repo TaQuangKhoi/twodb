@@ -8,6 +8,7 @@ pub struct Table {
     pub export_complexity_type: ExportComplexityType,
     pub database: String,
     pub export_order: i32,
+    pub is_self_referencing: bool,
 }
 impl Table {
     pub fn increase_export_order(&mut self) {
@@ -22,7 +23,8 @@ pub fn create_tables_table(conn: &Connection) {
             table_type TEXT NOT NULL,
             export_complexity_type TEXT NOT NULL,
             database TEXT NOT NULL,
-            export_order INTEGER NOT NULL
+            export_order INTEGER NOT NULL,
+            is_self_referencing BOOLEAN NOT NULL
         )",
         params![],
     ).unwrap();
@@ -35,18 +37,37 @@ pub fn build_base_simple_table(name: String, database: String) -> Table {
         export_complexity_type: ExportComplexityType::SIMPLE,
         database,
         export_order: 0,
+        is_self_referencing: false,
+    };
+    new_table
+}
+pub fn build_self_references_table(name: String, database: String) -> Table{
+    let new_table = Table {
+        id: 0,
+        name,
+        table_type: TableType::BaseTable,
+        export_complexity_type: ExportComplexityType::COMPLEX,
+        database,
+        export_order: 0,
+        is_self_referencing: true,
     };
     new_table
 }
 pub fn insert_new_table(conn: &Connection, table: Table) {
     conn.execute(
-        "INSERT INTO tables (name, table_type , export_complexity_type, database, export_order)
-            VALUES (?1, ?2, ?3, ?4, ?5)",
+        "INSERT INTO tables (name,
+        table_type, export_complexity_type, database,
+        export_order,
+        is_self_referencing
+        )
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
         params![
             table.name,
             table.table_type.name(),
             table.export_complexity_type.name(),
-            table.database, table.export_order
+            table.database,
+            table.export_order,
+            table.is_self_referencing,
         ],
     ).unwrap();
 }
