@@ -1,7 +1,6 @@
 use std::env::var;
-use rusqlite::Connection;
+use rusqlite::{Connection, params};
 use crate::database::connect;
-use crate::is_table_exists;
 use crate::table::{build_base_simple_table, create_tables_table, insert_new_table};
 
 pub fn prepare_knowledge() {
@@ -10,6 +9,13 @@ pub fn prepare_knowledge() {
 
     let target_database_name = var("POSTGRES_DB_2").unwrap_or(String::from(""));
     get_clean_tables(&target_database_name);
+}
+
+fn is_table_exists(conn: &Connection, table_name: String) -> bool {
+    let mut stmt = conn.prepare("SELECT id FROM tables WHERE name = ?1").unwrap();
+    let mut rows = stmt.query(params![table_name]).unwrap();
+
+    rows.next().unwrap_or(None).is_none() == false
 }
 
 fn get_clean_tables(database_name: &String) {

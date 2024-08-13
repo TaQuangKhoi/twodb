@@ -27,7 +27,6 @@ fn compare_database() {
     let sqlite_conn = Connection::open("twodb.db").unwrap();
     let tables_to_compare = get_tables(&sqlite_conn);
 
-    // println!("{:?}", tables_to_compare);
     for table in tables_to_compare {
         let table_name = table.name.clone();
         let query = "SELECT * FROM ".to_string() + table_name.as_str();
@@ -75,13 +74,6 @@ fn compare_database() {
             }
         }
     }
-}
-
-fn is_table_exists(conn: &Connection, table_name: String) -> bool {
-    let mut stmt = conn.prepare("SELECT id FROM tables WHERE name = ?1").unwrap();
-    let mut rows = stmt.query(params![table_name]).unwrap();
-
-    rows.next().unwrap_or(None).is_none() == false
 }
 
 fn get_all_tables(database_name: String) {
