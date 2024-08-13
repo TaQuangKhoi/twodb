@@ -110,6 +110,44 @@ fn is_table_exists(conn: &Connection, table_name: String) -> bool {
 
     rows.next().unwrap_or(None).is_none() == false
 }
+fn get_table_self_references(database_name: &String) {
+    let mut client = connect(database_name.clone()).unwrap();
+    let query = "
+    SELECT
+        conname AS constraint_name,
+        conrelid::regclass AS table_name,
+        a.attname AS column_name
+    FROM
+        pg_constraint AS c
+    JOIN
+        pg_attribute AS a
+    ON
+        a.attnum = ANY(c.conkey) AND a.attrelid = c.conrelid
+    WHERE
+        c.confrelid = c.conrelid
+        AND c.contype = 'f'
+    AND c.conrelid::regclass = c.confrelid::regclass;";
+
+    let rows = client.query(
+        &query,
+        &[],
+    ).unwrap();
+
+    let conn = Connection::open("twodb.db").unwrap();
+    create_tables_table(&conn);
+
+    for row in rows {
+        let table = build_base_simple_table(row.get(0), database_name.clone());
+
+        // check if table exists
+        if is_table_exists(&conn, table.name.clone()) {
+            continue;
+        }
+
+        insert_new_table(&conn, table);
+    }
+    conn.close().unwrap();
+}
 
 fn run_database(database_name: String) {
     let mut client = match connect(database_name) {
