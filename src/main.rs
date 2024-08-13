@@ -7,6 +7,7 @@ use std::env::var;
 use std::time::SystemTime;
 use rusqlite::{params, Connection};
 use table::{insert_new_table, build_base_simple_table};
+use crate::table::create_tables_table;
 
 fn main() {
     prepare_knowledge();
@@ -41,17 +42,7 @@ fn get_clean_tables(database_name: &String) {
     ).unwrap();
 
     let conn = Connection::open("twodb.db").unwrap();
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS tables (
-            id INTEGER PRIMARY KEY,
-            name TEXT NOT NULL,
-            table_type TEXT NOT NULL,
-            export_complexity_type TEXT NOT NULL,
-            database TEXT NOT NULL,
-            export_order INTEGER NOT NULL
-        )",
-        params![],
-    ).unwrap();
+    create_tables_table(&conn);
 
     for row in rows {
         let table = build_base_simple_table(row.get(0), database_name.clone());

@@ -14,6 +14,19 @@ impl Table {
         self.export_order += 1;
     }
 }
+pub fn create_tables_table(conn: &Connection) {
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS tables (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            table_type TEXT NOT NULL,
+            export_complexity_type TEXT NOT NULL,
+            database TEXT NOT NULL,
+            export_order INTEGER NOT NULL
+        )",
+        params![],
+    ).unwrap();
+}
 pub fn build_base_simple_table(name: String, database: String) -> Table {
     let new_table = Table {
         id: 0,
