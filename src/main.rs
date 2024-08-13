@@ -7,6 +7,7 @@ mod working_database;
 use database::connect;
 use std::env::var;
 use std::time::SystemTime;
+use postgres::error::SqlState;
 use rusqlite::{params, Connection};
 use table::{insert_new_table, build_base_simple_table};
 use table::create_tables_table;
@@ -31,14 +32,30 @@ fn compare_database() {
     for table in tables_to_compare {
         let table_name = table.name.clone();
         let query = "SELECT * FROM ".to_string() + table_name.as_str();
-        let source_rows = source_client.query(
-            &query,
-            &[],
-        ).unwrap();
-        let target_rows = target_client.query(
-            &query,
-            &[],
-        ).unwrap();
+        let source_rows = match source_client.query(&query, &[]) {
+            Ok(rows) => rows,
+            Err(err) => {
+                if let Some(db_err) = err.as_db_error() {
+                    if db_err.code() == &SqlState::from_code("42P01") {
+                        println!("Table: {} does not exist in the source database", table_name);
+                        continue;
+                    }
+                }
+                panic!("Error querying source database: {:?}", err);
+            }
+        };
+        let target_rows = match target_client.query(&query, &[]) {
+            Ok(rows) => rows,
+            Err(err) => {
+                if let Some(db_err) = err.as_db_error() {
+                    if db_err.code() == &SqlState::from_code("42P01") {
+                        println!("Table: {} does not exist in the target database", table_name);
+                        continue;
+                    }
+                }
+                panic!("Error querying target database: {:?}", err);
+            }
+        };
 
         let source_rows_count = source_rows.len();
         let target_rows_count = target_rows.len();
@@ -172,7 +189,12 @@ fn get_cells(row: &postgres::Row) {
             "int8" => {
                 let value: Option<i64> = row.try_get(name).unwrap_or(None);
                 format!("{}: {}", name, value.unwrap_or(0))
-            }
+            },
+            "int4" => {
+                let value: Option<i32> = row.try_get(name).unwrap_or(None);
+                format!("{}: {}", name, value.unwrap_or(0))
+            },
+
             "varchar" => {
                 let value: Option<&str> = row.try_get(name).unwrap_or(None);
                 format!("{}: {}", name, value.unwrap_or("None"))
