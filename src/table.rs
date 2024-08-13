@@ -2,7 +2,7 @@ use rusqlite::{Connection, params};
 
 #[derive(Debug)]
 pub struct Table {
-    id: i32,
+    pub id: i32,
     pub name: String,
     pub table_type: TableType,
     pub export_complexity_type: ExportComplexityType,
@@ -51,6 +51,7 @@ pub fn insert_new_table(conn: &Connection, table: Table) {
     ).unwrap();
 }
 
+pub const BASE_TABLE_STR: &str = "BASE TABLE";
 
 #[derive(Debug)]
 pub enum TableType {
@@ -60,7 +61,7 @@ pub enum TableType {
 impl TableType {
     pub fn name(&self) -> &str {
         match self {
-            TableType::BaseTable => "BASE TABLE",
+            TableType::BaseTable => BASE_TABLE_STR,
             TableType::VIEW => "VIEW",
         }
     }
