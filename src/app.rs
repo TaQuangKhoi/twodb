@@ -1,4 +1,6 @@
 use std::env::var;
+use egui::Align2;
+use egui_toast::{Toast, ToastKind, ToastOptions, ToastStyle, Toasts};
 use crate::working_database::get_clean_tables;
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
@@ -46,6 +48,10 @@ impl eframe::App for TemplateApp {
 
     /// Called each time the UI needs repainting, which may be many times per second.
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        let mut toasts = Toasts::new()
+            .anchor(Align2::RIGHT_BOTTOM, (-10.0, -10.0)) // 10 units from the bottom right corner
+            .direction(egui::Direction::BottomUp);
+
         // Put your widgets into a `SidePanel`, `TopBottomPanel`, `CentralPanel`, `Window` or `Area`.
         // For inspiration and more examples, go to https://emilk.github.io/egui
 
@@ -65,10 +71,28 @@ impl eframe::App for TemplateApp {
                         if ui.button("Get Clean Tables for Source").clicked() {
                             let database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
                             get_clean_tables(&database_name);
+                            let text = format!("Done Get Clean Tables for {}", database_name);
+                            toasts.add(Toast {
+                                text: text.into(),
+                                kind: ToastKind::Success,
+                                options: ToastOptions::default()
+                                    .duration_in_seconds(5.0)
+                                    .show_progress(true),
+                                ..Default::default()
+                            });
                         }
                         if ui.button("Get Clean Tables for Target").clicked() {
                             let database_name = var("POSTGRES_DB_TARGET").unwrap_or(String::from(""));
                             get_clean_tables(&database_name);
+                            let text = format!("Done Get Clean Tables for {}", database_name);
+                            toasts.add(Toast {
+                                text: text.into(),
+                                kind: ToastKind::Success,
+                                options: ToastOptions::default()
+                                    .duration_in_seconds(5.0)
+                                    .show_progress(true),
+                                ..Default::default()
+                            });
                         }
                     });
                     ui.add_space(16.0);
@@ -104,6 +128,8 @@ impl eframe::App for TemplateApp {
                 egui::warn_if_debug_build(ui);
             });
         });
+
+        toasts.show(ctx);
     }
 }
 

@@ -77,11 +77,11 @@ pub fn get_cells(row: &postgres::Row) -> Vec<String> {
             "int8" => {
                 let value: Option<i64> = row.try_get(name).unwrap_or(None);
                 format!("{}: {}", name, value.unwrap_or(0))
-            },
+            }
             "int4" => {
                 let value: Option<i32> = row.try_get(name).unwrap_or(None);
                 format!("{}: {}", name, value.unwrap_or(0))
-            },
+            }
 
             "varchar" => {
                 let value: Option<&str> = row.try_get(name).unwrap_or(None);
@@ -236,6 +236,4 @@ fn run_database(database_name: String) {
     client.close().unwrap();
 }
 
-pub fn different_row_count() {
-
-}
+pub fn different_row_count() {}
