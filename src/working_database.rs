@@ -1,3 +1,4 @@
+use std::env::var;
 use std::time::SystemTime;
 use crate::_row_to_string;
 use crate::database::connect;
@@ -67,6 +68,29 @@ fn get_all_tables(database_name: String) {
     for row in rows {
         println!("{}", _row_to_string(&row));
     }
+}
+
+fn run_database(database_name: String) {
+    let mut client = match connect(database_name) {
+        Ok(client) => client,
+        Err(err) => {
+            println!("Error: {}", err);
+            return;
+        }
+    };
+
+    let table_name = var("TABLE_NAME").unwrap_or(String::from(""));
+    let query = "SELECT * FROM ".to_string() + table_name.as_str();
+    let rows = client.query(
+        &query,
+        &[],
+    ).unwrap();
+
+    for row in rows {
+        println!("{}", _row_to_string(&row));
+    }
+
+    client.close().unwrap();
 }
 
 pub fn different_row_count() {

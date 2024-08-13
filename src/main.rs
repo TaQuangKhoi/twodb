@@ -7,7 +7,7 @@ mod working_database;
 use database::connect;
 use std::env::var;
 use postgres::error::SqlState;
-use rusqlite::{params, Connection};
+use rusqlite::{Connection};
 use crate::core::get_tables;
 use crate::preparation::prepare_knowledge;
 use crate::working_database::get_cells;
@@ -74,29 +74,6 @@ fn compare_database() {
             }
         }
     }
-}
-
-fn run_database(database_name: String) {
-    let mut client = match connect(database_name) {
-        Ok(client) => client,
-        Err(err) => {
-            println!("Error: {}", err);
-            return;
-        }
-    };
-
-    let table_name = var("TABLE_NAME").unwrap_or(String::from(""));
-    let query = "SELECT * FROM ".to_string() + table_name.as_str();
-    let rows = client.query(
-        &query,
-        &[],
-    ).unwrap();
-
-    for row in rows {
-        println!("{}", _row_to_string(&row));
-    }
-
-    client.close().unwrap();
 }
 
 fn _row_to_string(row: &postgres::Row) -> String {
