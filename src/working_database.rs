@@ -152,7 +152,6 @@ pub fn get_clean_tables(database_name: &String) {
         &[],
     ).unwrap();
 
-    println!("Start inserting tables into the database");
     let conn = Connection::open("twodb.db").unwrap();
     create_tables_table(&conn);
 
