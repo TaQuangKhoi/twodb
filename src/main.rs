@@ -1,81 +1,62 @@
-pub mod database;
-mod preparation;
-mod table;
-mod core;
-mod working_database;
+#![warn(clippy::all, rust_2018_idioms)]
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
-use database::connect;
-use std::env::var;
-use postgres::error::SqlState;
-use rusqlite::{Connection};
-use crate::core::get_tables;
-use crate::preparation::prepare_knowledge;
-use crate::working_database::get_cells;
+// When compiling natively:
+#[cfg(not(target_arch = "wasm32"))]
+fn main() -> eframe::Result {
+    env_logger::init(); // Log to stderr (if you run with `RUST_LOG=debug`).
 
+    let native_options = eframe::NativeOptions {
+        viewport: egui::ViewportBuilder::default()
+            .with_inner_size([400.0, 300.0])
+            .with_min_inner_size([300.0, 220.0])
+            .with_icon(
+                // NOTE: Adding an icon is optional
+                eframe::icon_data::from_png_bytes(&include_bytes!("../assets/icon-256.png")[..])
+                    .expect("Failed to load icon"),
+            ),
+        ..Default::default()
+    };
+    eframe::run_native(
+        "eframe template",
+        native_options,
+        Box::new(|cc| Ok(Box::new(eframe_template::TemplateApp::new(cc)))),
+    )
+}
+
+// When compiling to web using trunk:
+#[cfg(target_arch = "wasm32")]
 fn main() {
-    prepare_knowledge();
-    compare_database();
-    // export based on complexity
-}
+    // Redirect `log` message to `console.log` and friends:
+    eframe::WebLogger::init(log::LevelFilter::Debug).ok();
 
-fn compare_database() {
-    let source_database_name = var("POSTGRES_DB_1").unwrap_or(String::from(""));
-    let target_database_name = var("POSTGRES_DB_2").unwrap_or(String::from(""));
-    let mut source_client = connect(source_database_name.clone()).unwrap();
-    let mut target_client = connect(target_database_name.clone()).unwrap();
+    let web_options = eframe::WebOptions::default();
 
-    let sqlite_conn = Connection::open("twodb.db").unwrap();
-    let tables_to_compare = get_tables(&sqlite_conn);
+    wasm_bindgen_futures::spawn_local(async {
+        let start_result = eframe::WebRunner::new()
+            .start(
+                "the_canvas_id",
+                web_options,
+                Box::new(|cc| Ok(Box::new(eframe_template::TemplateApp::new(cc)))),
+            )
+            .await;
 
-    for table in tables_to_compare {
-        let table_name = table.name.clone();
-        let query = "SELECT * FROM ".to_string() + table_name.as_str();
-        let source_rows = match source_client.query(&query, &[]) {
-            Ok(rows) => rows,
-            Err(err) => {
-                if let Some(db_err) = err.as_db_error() {
-                    if db_err.code() == &SqlState::from_code("42P01") {
-                        println!("Table: {} does not exist in the source database", table_name);
-                        continue;
-                    }
+        // Remove the loading text and spinner:
+        let loading_text = web_sys::window()
+            .and_then(|w| w.document())
+            .and_then(|d| d.get_element_by_id("loading_text"));
+        if let Some(loading_text) = loading_text {
+            match start_result {
+                Ok(_) => {
+                    loading_text.remove();
                 }
-                panic!("Error querying source database: {:?}", err);
-            }
-        };
-        let target_rows = match target_client.query(&query, &[]) {
-            Ok(rows) => rows,
-            Err(err) => {
-                if let Some(db_err) = err.as_db_error() {
-                    if db_err.code() == &SqlState::from_code("42P01") {
-                        println!("Table: {} does not exist in the target database", table_name);
-                        continue;
-                    }
+                Err(e) => {
+                    loading_text.set_inner_html(
+                        "<p> The app has crashed. See the developer console for details. </p>",
+                    );
+                    panic!("Failed to start eframe: {e:?}");
                 }
-                panic!("Error querying target database: {:?}", err);
-            }
-        };
-
-        let source_rows_count = source_rows.len();
-        let target_rows_count = target_rows.len();
-        if source_rows_count != target_rows_count {
-            println!("Table: {} has different rows count: {} vs {}", table_name, source_rows_count, target_rows_count);
-            continue;
-        }
-
-        for (source_row, target_row) in source_rows.iter().zip(target_rows.iter()) {
-            let source_cells = get_cells(source_row);
-
-            let target_cells = get_cells(target_row);
-
-            if source_cells != target_cells {
-                println!("Table: {} has different cells", table_name);
-                println!("Source: {:?}", source_cells);
-                println!("Target: {:?}", target_cells);
             }
         }
-    }
-}
-
-fn _row_to_string(row: &postgres::Row) -> String {
-    format!("{:?}", get_cells(row))
+    });
 }
