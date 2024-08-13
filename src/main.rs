@@ -1,58 +1,17 @@
 pub mod database;
+mod preparation;
+mod table;
 
 use database::connect;
 use std::env::var;
 use std::time::SystemTime;
 use rusqlite::{params, Connection};
+use table::{build_base_simple_table, Table};
 
 fn main() {
     prepare_knowledge();
 
     // export based on complexity
-}
-
-#[derive(Debug)]
-struct Table {
-    id: i32,
-    name: String,
-    table_type: TableType,
-    export_complexity_type: ExportComplexityType,
-    database: String,
-    export_order: i32,
-}
-
-#[derive(Debug)]
-enum TableType {
-    BaseTable,
-    VIEW,
-}
-impl TableType {
-    fn name(&self) -> &str {
-        match self {
-            TableType::BaseTable => "BASE TABLE",
-            TableType::VIEW => "VIEW",
-        }
-    }
-}
-
-#[derive(Debug)]
-enum ExportComplexityType {
-    SIMPLE,
-    COMPLEX,
-}
-impl ExportComplexityType {
-    fn name(&self) -> &str {
-        match self {
-            ExportComplexityType::SIMPLE => "SIMPLE",
-            ExportComplexityType::COMPLEX => "COMPLEX",
-        }
-    }
-}
-
-impl Table {
-    fn increase_export_order(&mut self) {
-        self.export_order += 1;
-    }
 }
 
 fn prepare_knowledge() {
@@ -104,18 +63,6 @@ fn get_clean_tables(database_name: &String) {
 
         insert_new_table(&conn, table);
     }
-}
-
-fn build_base_simple_table(name: String, database: String) -> Table {
-    let new_table = Table {
-        id: 0,
-        name,
-        table_type: TableType::BaseTable,
-        export_complexity_type: ExportComplexityType::SIMPLE,
-        database,
-        export_order: 0,
-    };
-    new_table
 }
 
 fn is_table_exists(conn: &Connection, table_name: String) -> bool {
