@@ -17,6 +17,7 @@ pub fn get_tables(conn: &Connection) -> Vec<Table> {
             export_complexity_type: ExportComplexityType::SIMPLE,
             database: row.get(4)?,
             export_order: row.get(5)?,
+            is_self_referencing: false,
         })
     }).unwrap();
     let mut result = Vec::new();
