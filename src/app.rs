@@ -1,3 +1,6 @@
+use std::env::var;
+use crate::working_database::get_clean_tables;
+
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
@@ -56,6 +59,16 @@ impl eframe::App for TemplateApp {
                     ui.menu_button("File", |ui| {
                         if ui.button("Quit").clicked() {
                             ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                        }
+                    });
+                    ui.menu_button("Update", |ui| {
+                        if ui.button("Get Clean Tables for Source").clicked() {
+                            let database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
+                            get_clean_tables(&database_name);
+                        }
+                        if ui.button("Get Clean Tables for Target").clicked() {
+                            let database_name = var("POSTGRES_DB_TARGET").unwrap_or(String::from(""));
+                            get_clean_tables(&database_name);
                         }
                     });
                     ui.add_space(16.0);

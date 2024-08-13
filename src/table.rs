@@ -55,13 +55,19 @@ pub fn build_self_references_table(name: String, database: String) -> Table{
 }
 pub fn insert_new_table(conn: &Connection, table: Table) {
     conn.execute(
-        "INSERT INTO tables (name, table_type , export_complexity_type, database, export_order)
-            VALUES (?1, ?2, ?3, ?4, ?5)",
+        "INSERT INTO tables (name,
+        table_type, export_complexity_type, database,
+        export_order,
+        is_self_referencing
+        )
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
         params![
             table.name,
             table.table_type.name(),
             table.export_complexity_type.name(),
-            table.database, table.export_order
+            table.database,
+            table.export_order,
+            table.is_self_referencing,
         ],
     ).unwrap();
 }

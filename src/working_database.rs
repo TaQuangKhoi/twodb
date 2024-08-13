@@ -1,13 +1,14 @@
 use std::env::var;
 use std::time::SystemTime;
+use postgres::error::SqlState;
 use rusqlite::{Connection, params};
-use crate::_row_to_string;
+use crate::core::get_tables;
 use crate::database::connect;
 use crate::table::{build_base_simple_table, create_tables_table, insert_new_table};
 
 fn compare_database() {
-    let source_database_name = var("POSTGRES_DB_1").unwrap_or(String::from(""));
-    let target_database_name = var("POSTGRES_DB_2").unwrap_or(String::from(""));
+    let source_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
+    let target_database_name = var("POSTGRES_DB_TARGET").unwrap_or(String::from(""));
     let mut source_client = connect(source_database_name.clone()).unwrap();
     let mut target_client = connect(target_database_name.clone()).unwrap();
 
@@ -151,6 +152,7 @@ pub fn get_clean_tables(database_name: &String) {
         &[],
     ).unwrap();
 
+    println!("Start inserting tables into the database");
     let conn = Connection::open("twodb.db").unwrap();
     create_tables_table(&conn);
 
@@ -175,23 +177,23 @@ fn is_table_exists(conn: &Connection, table_name: String) -> bool {
 fn get_table_self_references(database_name: &String) {
     let mut client = connect(database_name.clone()).unwrap();
     let query = "
-    SELECT
-        conname AS constraint_name,
-        conrelid::regclass AS table_name,
-        a.attname AS column_name
-    FROM
-        pg_constraint AS c
-    JOIN
-        pg_attribute AS a
-    ON
-        a.attnum = ANY(c.conkey) AND a.attrelid = c.conrelid
-    WHERE
-        c.confrelid = c.conrelid
-        AND c.contype = 'f'
+    SELECT \
+        conname AS constraint_name, \
+        conrelid::regclass AS table_name, \
+        a.attname AS column_name \
+    FROM \
+        pg_constraint AS c \
+    JOIN \
+        pg_attribute AS a \
+    ON \
+        a.attnum = ANY(c.conkey) AND a.attrelid = c.conrelid \
+    WHERE \
+        c.confrelid = c.conrelid \
+        AND c.contype = 'f' \
     AND c.conrelid::regclass = c.confrelid::regclass;";
 
     let rows = client.query(
-        &query,
+        query,
         &[],
     ).unwrap();
 

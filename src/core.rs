@@ -3,7 +3,7 @@
  */
 
 use rusqlite::{Connection, params};
-use crate::table::{ExportComplexityType, Table, TableType, BASE_TABLE_STR};
+use crate::table::{ExportComplexityType, Table, TableType};
 
 pub fn get_tables(conn: &Connection) -> Vec<Table> {
     let mut stmt = conn.prepare(
