@@ -1,3 +1,5 @@
+use rusqlite::{Connection, params};
+
 #[derive(Debug)]
 pub struct Table {
     id: i32,
@@ -12,7 +14,6 @@ impl Table {
         self.export_order += 1;
     }
 }
-
 pub fn build_base_simple_table(name: String, database: String) -> Table {
     let new_table = Table {
         id: 0,
@@ -23,6 +24,18 @@ pub fn build_base_simple_table(name: String, database: String) -> Table {
         export_order: 0,
     };
     new_table
+}
+pub fn insert_new_table(conn: &Connection, table: Table) {
+    conn.execute(
+        "INSERT INTO tables (name, table_type , export_complexity_type, database, export_order)
+            VALUES (?1, ?2, ?3, ?4, ?5)",
+        params![
+            table.name,
+            table.table_type.name(),
+            table.export_complexity_type.name(),
+            table.database, table.export_order
+        ],
+    ).unwrap();
 }
 
 

@@ -6,7 +6,7 @@ use database::connect;
 use std::env::var;
 use std::time::SystemTime;
 use rusqlite::{params, Connection};
-use table::{build_base_simple_table, Table};
+use table::{insert_new_table, build_base_simple_table};
 
 fn main() {
     prepare_knowledge();
@@ -70,19 +70,6 @@ fn is_table_exists(conn: &Connection, table_name: String) -> bool {
     let mut rows = stmt.query(params![table_name]).unwrap();
 
     rows.next().unwrap_or(None).is_none() == false
-}
-
-fn insert_new_table(conn: &Connection, table: Table) {
-    conn.execute(
-        "INSERT INTO tables (name, table_type , export_complexity_type, database, export_order)
-            VALUES (?1, ?2, ?3, ?4, ?5)",
-        params![
-            table.name,
-            table.table_type.name(),
-            table.export_complexity_type.name(),
-            table.database, table.export_order
-        ],
-    ).unwrap();
 }
 
 fn get_all_tables(database_name: String) {
