@@ -1,4 +1,6 @@
 use std::time::SystemTime;
+use crate::_row_to_string;
+use crate::database::connect;
 
 pub fn get_cells(row: &postgres::Row) -> Vec<String> {
     let columns = row.columns();
@@ -35,4 +37,38 @@ pub fn get_cells(row: &postgres::Row) -> Vec<String> {
         }
     }).collect();
     cells
+}
+
+fn get_all_tables(database_name: String) {
+    let mut client = connect(database_name).unwrap();
+    let query =
+        "SELECT table_name, table_type \
+        FROM information_schema.tables \
+        WHERE table_schema = 'public'"
+            .to_string();
+
+    let rows = client.query(
+        &query,
+        &[],
+    ).unwrap();
+
+    let base_tables: Vec<String> = rows.iter().map(|row| {
+        let table_name: String = row.get(0);
+        let table_type: String = row.get(1);
+        if table_type == "BASE TABLE" {
+            table_name
+        } else {
+            Some(String::from("")).unwrap()
+        }
+    }).filter(|table_name| table_name.len() > 0).collect();
+
+    println!("Total base tables: {}", base_tables.len());
+
+    for row in rows {
+        println!("{}", _row_to_string(&row));
+    }
+}
+
+pub fn different_row_count() {
+
 }
