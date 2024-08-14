@@ -198,7 +198,7 @@ pub fn get_empty_tables(database_name: &String) {
             continue;
         }
 
-        let mut table: Table = build_base_simple_table(table_name, database_name.clone());
+        let table: Table = build_base_simple_table(table_name, database_name.clone());
         insert_new_table(&sqlite_conn, table);
     }
 }
