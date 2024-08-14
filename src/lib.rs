@@ -6,5 +6,4 @@ mod working_database;
 mod database;
 mod table;
 mod core;
-mod update_empty_tables_button;
 mod widgets;
