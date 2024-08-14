@@ -3,6 +3,8 @@ use std::thread;
 use egui::Align2;
 use egui_toast::{Toast, ToastKind, ToastOptions, Toasts};
 use crate::working_database::get_clean_tables;
+use std::sync::mpsc;
+use std::sync::mpsc::Receiver;
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
@@ -45,7 +47,7 @@ impl TwoDBApp {
         Default::default()
     }
 
-    fn button_get_clean_tables_event(&mut self) {
+    fn button_get_clean_tables_event(&mut self, tx: mpsc::Sender<String>) {
         thread::spawn(|| {
             let mut thread_toasts = Toasts::new()
                 .anchor(Align2::RIGHT_BOTTOM, (-10.0, -10.0)) // 10 units from the bottom right corner
@@ -62,8 +64,8 @@ impl TwoDBApp {
                 ..Default::default()
             });
         });
-        // handle.join().unwrap();
-        // self.is_busy = false;
+        let val = String::from("hi");
+        tx.send(val).unwrap();
     }
 }
 
@@ -94,7 +96,10 @@ impl eframe::App for TwoDBApp {
                         if button.clicked() {
                             self.is_busy = true;
                             ui.close_menu();
-                            self.button_get_clean_tables_event();
+                            let (tx, rx) = mpsc::channel();
+                            self.button_get_clean_tables_event(tx);
+                            let received = rx.recv().unwrap();
+                            println!("Got: {received}");
                         }
 
                         if ui.button("Get Clean Tables for Target").clicked() {
@@ -112,7 +117,6 @@ impl eframe::App for TwoDBApp {
                         }
                     });
 
-                    println!("Busy: {}", self.is_busy);
                     if self.is_busy.eq(&true) {
                         ui.add(egui::Spinner::new());
                     }
