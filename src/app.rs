@@ -1,6 +1,6 @@
 use std::env::var;
 use egui::Align2;
-use egui_toast::{Toast, ToastKind, ToastOptions, ToastStyle, Toasts};
+use egui_toast::{Toast, ToastKind, ToastOptions, Toasts};
 use crate::working_database::get_clean_tables;
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
@@ -62,8 +62,10 @@ impl eframe::App for TwoDBApp {
                             ctx.send_viewport_cmd(egui::ViewportCommand::Close);
                         }
                     });
+                    let menu_button =
                     ui.menu_button("Update", |ui| {
-                        if ui.button("Get Clean Tables for Source").clicked() {
+                        let button = ui.button("Get Clean Tables for Source");
+                        if button.clicked() {
                             let database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
                             get_clean_tables(&database_name);
                             let text = format!("Done Get Clean Tables for {}", database_name);
@@ -90,6 +92,7 @@ impl eframe::App for TwoDBApp {
                             });
                         }
                     });
+                    ui.add(egui::Spinner::new());
                     ui.add_space(16.0);
                 }
 

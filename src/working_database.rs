@@ -158,8 +158,8 @@ pub fn get_clean_tables(database_name: &String) {
     create_tables_table(&conn);
 
     for row in rows {
-        let table = build_base_simple_table(row.get(0), database_name.clone());
-
+        let mut table = build_base_simple_table(row.get(0), database_name.clone());
+        table.update_row_count();
         // check if table exists
         if is_table_exists(&conn, table.name.clone()) {
             continue;
@@ -168,6 +168,19 @@ pub fn get_clean_tables(database_name: &String) {
         insert_new_table(&conn, table);
     }
     conn.close().unwrap();
+}
+pub fn get_empty_tables(database_name: &String) {
+    let mut pg_client = connect(database_name.clone()).unwrap();
+    let query =
+        "SELECT n.nspname, c.relname, c.reltuples
+        FROM pg_class c
+        INNER JOIN pg_namespace n ON (n.oid = c.relnamespace)
+        WHERE c.reltuples = 0 AND c.relkind = 'r';";
+
+    let rows = pg_client.query(
+        query,
+        &[],
+    ).unwrap();
 }
 fn is_table_exists(conn: &Connection, table_name: String) -> bool {
     let mut stmt = conn.prepare("SELECT id FROM tables WHERE name = ?1").unwrap();

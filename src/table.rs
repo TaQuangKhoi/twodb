@@ -1,4 +1,5 @@
 use rusqlite::{Connection, params};
+use crate::database::connect;
 
 #[derive(Debug)]
 pub struct Table {
@@ -9,10 +10,36 @@ pub struct Table {
     pub database: String,
     pub export_order: i32,
     pub is_self_referencing: bool,
+    pub row_count: i64, // postgres type: int8
+}
+impl Default for Table {
+    fn default() -> Self {
+        Self {
+            id: 0,
+            name: String::from(""),
+            table_type: TableType::BaseTable,
+            export_complexity_type: ExportComplexityType::SIMPLE,
+            database: String::from(""),
+            export_order: 0,
+            is_self_referencing: false,
+            row_count: 0,
+        }
+    }
 }
 impl Table {
     pub fn increase_export_order(&mut self) {
         self.export_order += 1;
+    }
+    pub fn update_row_count(&mut self) {
+        let query = "SELECT COUNT(*) FROM ".to_owned() + &self.name;
+        let mut pg_conn = connect(self.database.clone()).unwrap();
+        let rows = pg_conn.query(
+            &query,
+            &[],
+        ).unwrap();
+        // len
+        let count: i64 = rows[0].get(0);
+        self.row_count = count;
     }
 }
 
@@ -26,7 +53,8 @@ pub fn create_tables_table(conn: &Connection) {
             export_complexity_type TEXT NOT NULL,
             database TEXT NOT NULL,
             export_order INTEGER NOT NULL,
-            is_self_referencing BOOLEAN NOT NULL
+            is_self_referencing BOOLEAN NOT NULL,
+            row_count INTEGER NOT NULL
         )",
         params![],
     ).unwrap();
@@ -40,10 +68,11 @@ pub fn build_base_simple_table(name: String, database: String) -> Table {
         database,
         export_order: 0,
         is_self_referencing: false,
+        row_count: 0,
     };
     new_table
 }
-pub fn build_self_references_table(name: String, database: String) -> Table{
+pub fn build_self_references_table(name: String, database: String) -> Table {
     let new_table = Table {
         id: 0,
         name,
@@ -52,6 +81,7 @@ pub fn build_self_references_table(name: String, database: String) -> Table{
         database,
         export_order: 0,
         is_self_referencing: true,
+        row_count: 0,
     };
     new_table
 }
@@ -60,9 +90,12 @@ pub fn insert_new_table(conn: &Connection, table: Table) {
         "INSERT INTO tables (name,
         table_type, export_complexity_type, database,
         export_order,
-        is_self_referencing
+        is_self_referencing,
+        row_count
         )
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6,
+            ?7
+            )",
         params![
             table.name,
             table.table_type.name(),
@@ -70,6 +103,7 @@ pub fn insert_new_table(conn: &Connection, table: Table) {
             table.database,
             table.export_order,
             table.is_self_referencing,
+            table.row_count,
         ],
     ).unwrap();
 }
