@@ -66,6 +66,7 @@ impl eframe::App for TwoDBApp {
                         }
                     });
                     ui.menu_button("Update", |ui| {
+                        self.render_update_self_referencing_tables_button(ui);
                         self.render_update_tables_button(ui);
                         self.render_clean_tables_button(ui);
                         self.render_get_empty_tables_button(ui);
