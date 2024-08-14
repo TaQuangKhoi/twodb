@@ -7,5 +7,5 @@ mod database;
 mod table;
 mod core;
 mod update_clean_tables_button;
-mod get_empty_tables_button;
+mod update_empty_tables_button;
 mod widgets;
