@@ -8,7 +8,7 @@ use crate::working_database::get_clean_tables;
 
 impl TwoDBApp {
     pub fn render_clean_tables_button(&mut self, ui: &mut Ui) {
-        let button = ui.button("Get Clean Tables");
+        let button = ui.button("Update Clean Tables");
         if button.clicked() {
             self.is_busy = true;
             ui.close_menu();

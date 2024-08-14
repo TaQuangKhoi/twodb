@@ -177,7 +177,8 @@ pub fn get_empty_tables(database_name: &String) {
             c.reltuples
         FROM pg_class c
         INNER JOIN pg_namespace n ON (n.oid = c.relnamespace)
-        WHERE c.reltuples = 0 AND c.relkind = 'r';";
+        WHERE c.reltuples = 0 AND c.relkind = 'r'
+        and n.nspname = 'public';";
 
     let rows = pg_client.query(
         query,
