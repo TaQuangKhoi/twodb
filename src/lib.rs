@@ -6,3 +6,4 @@ mod working_database;
 mod database;
 mod table;
 mod core;
+mod menu_bar;

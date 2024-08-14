@@ -4,7 +4,6 @@ use egui::Align2;
 use egui_toast::{Toast, ToastKind, ToastOptions, Toasts};
 use crate::working_database::get_clean_tables;
 use std::sync::mpsc;
-use std::sync::mpsc::Receiver;
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
@@ -16,7 +15,7 @@ pub struct TwoDBApp {
     #[serde(skip)] // This how you opt-out of serialization of a field
     value: f32,
 
-    is_busy: bool, // This field is for Spinner
+    pub(crate) is_busy: bool, // This field is for Spinner
 }
 
 impl Default for TwoDBApp {
@@ -46,27 +45,6 @@ impl TwoDBApp {
 
         Default::default()
     }
-
-    fn button_get_clean_tables_event(&mut self, tx: mpsc::Sender<String>) {
-        thread::spawn(|| {
-            let mut thread_toasts = Toasts::new()
-                .anchor(Align2::RIGHT_BOTTOM, (-10.0, -10.0)) // 10 units from the bottom right corner
-                .direction(egui::Direction::BottomUp);
-            let database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
-            get_clean_tables(&database_name);
-            let text = format!("Done Get Clean Tables for {}", database_name);
-            thread_toasts.add(Toast {
-                text: text.into(),
-                kind: ToastKind::Success,
-                options: ToastOptions::default()
-                    .duration_in_seconds(5.0)
-                    .show_progress(true),
-                ..Default::default()
-            });
-        });
-        let val = String::from("hi");
-        tx.send(val).unwrap();
-    }
 }
 
 impl eframe::App for TwoDBApp {
@@ -92,15 +70,7 @@ impl eframe::App for TwoDBApp {
                         }
                     });
                     ui.menu_button("Update", |ui| {
-                        let button = ui.button("Get Clean Tables for Source");
-                        if button.clicked() {
-                            self.is_busy = true;
-                            ui.close_menu();
-                            let (tx, rx) = mpsc::channel();
-                            self.button_get_clean_tables_event(tx);
-                            let received = rx.recv().unwrap();
-                            println!("Got: {received}");
-                        }
+                        self.render_clean_tables_button(ui);
 
                         if ui.button("Get Clean Tables for Target").clicked() {
                             let database_name = var("POSTGRES_DB_TARGET").unwrap_or(String::from(""));
