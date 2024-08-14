@@ -1,9 +1,5 @@
-use std::env::var;
-use std::thread;
 use egui::Align2;
 use egui_toast::{Toast, ToastKind, ToastOptions, Toasts};
-use crate::working_database::get_clean_tables;
-use std::sync::mpsc;
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
