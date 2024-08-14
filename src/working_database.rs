@@ -168,7 +168,7 @@ pub fn update_clean_tables(database_name: &String) {
     }
     conn.close().unwrap();
 }
-pub fn get_empty_tables(database_name: &String) {
+pub fn update_empty_tables(database_name: &String) {
     let mut pg_client = connect(database_name.clone()).unwrap();
     let query =
         "SELECT n.nspname,
