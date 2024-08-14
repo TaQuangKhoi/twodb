@@ -135,7 +135,7 @@ pub fn update_all_tables(database_name: &String) {
 }
 /// Get all tables that do not have foreign keys
 /// then save them to the tables table
-pub fn get_clean_tables(database_name: &String) {
+pub fn update_clean_tables(database_name: &String) {
     let mut client = connect(database_name.clone()).unwrap();
     let query = "SELECT table_name
         FROM information_schema.tables

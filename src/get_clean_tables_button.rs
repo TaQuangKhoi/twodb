@@ -4,7 +4,7 @@ use eframe::emath::Align2;
 use egui::Ui;
 use egui_toast::{Toast, ToastKind, ToastOptions, Toasts};
 use crate::TwoDBApp;
-use crate::working_database::get_clean_tables;
+use crate::working_database::update_clean_tables;
 
 impl TwoDBApp {
     pub fn render_clean_tables_button(&mut self, ui: &mut Ui) {
@@ -22,10 +22,10 @@ impl TwoDBApp {
                 .direction(egui::Direction::BottomUp);
 
             let database_name_source = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
-            get_clean_tables(&database_name_source);
+            update_clean_tables(&database_name_source);
 
             let database_name_target = var("POSTGRES_DB_TARGET").unwrap_or(String::from(""));
-            get_clean_tables(&database_name_target);
+            update_clean_tables(&database_name_target);
 
             let text = format!("Done Get Clean Tables for {} and {}", database_name_source, database_name_target);
             thread_toasts.add(Toast {
