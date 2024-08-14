@@ -1,11 +1,11 @@
 use std::env::var;
 use postgres::{Client, Error, NoTls};
 
-/**
- * Connect to the database
- *
- * Author : Ta Quang Khoi
- */
+/// Connect to the PostgreSQL database
+///
+/// Return a postgres::client::Client object
+///
+/// Author : Ta Quang Khoi
 pub fn connect(database_name: String) -> rusqlite::Result<Client, Error> {
     let username = var("POSTGRES_USER").unwrap_or(String::from(""));
     let password = var("POSTGRES_PASSWORD").unwrap_or(String::from(""));

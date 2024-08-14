@@ -15,6 +15,8 @@ impl Table {
         self.export_order += 1;
     }
 }
+
+/// Create a new table named `tables` in the SQLite database
 pub fn create_tables_table(conn: &Connection) {
     conn.execute(
         "CREATE TABLE IF NOT EXISTS tables (
