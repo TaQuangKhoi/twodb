@@ -172,7 +172,9 @@ pub fn get_clean_tables(database_name: &String) {
 pub fn get_empty_tables(database_name: &String) {
     let mut pg_client = connect(database_name.clone()).unwrap();
     let query =
-        "SELECT n.nspname, c.relname, c.reltuples
+        "SELECT n.nspname,
+            c.relname AS table_name,
+            c.reltuples
         FROM pg_class c
         INNER JOIN pg_namespace n ON (n.oid = c.relnamespace)
         WHERE c.reltuples = 0 AND c.relkind = 'r';";
@@ -186,7 +188,7 @@ pub fn get_empty_tables(database_name: &String) {
     create_tables_table(&sqlite_conn);
 
     for row in rows {
-        let table_name: String = row.get(0);
+        let table_name: String = row.get(1);
 
         // check if table exists, update row count
         if is_table_exists(&sqlite_conn, table_name.clone()) {

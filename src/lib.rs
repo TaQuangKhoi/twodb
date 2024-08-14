@@ -7,3 +7,4 @@ mod database;
 mod table;
 mod core;
 mod menu_bar;
+mod get_empty_tables_button;

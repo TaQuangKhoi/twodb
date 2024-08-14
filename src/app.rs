@@ -71,6 +71,7 @@ impl eframe::App for TwoDBApp {
                     });
                     ui.menu_button("Update", |ui| {
                         self.render_clean_tables_button(ui);
+                        self.render_get_empty_tables_button(ui);
 
                         if ui.button("Get Clean Tables for Target").clicked() {
                             let database_name = var("POSTGRES_DB_TARGET").unwrap_or(String::from(""));
