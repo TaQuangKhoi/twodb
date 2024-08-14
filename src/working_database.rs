@@ -138,15 +138,15 @@ fn get_all_tables(database_name: String) {
 /// then save them to the tables table
 pub fn get_clean_tables(database_name: &String) {
     let mut client = connect(database_name.clone()).unwrap();
-    let query = "SELECT table_name \
-        FROM information_schema.tables \
-        WHERE table_schema = 'public' \
-        AND table_type = 'BASE TABLE' \
-        AND table_name NOT IN ( \
-            SELECT DISTINCT table_name \
-            FROM information_schema.table_constraints \
-            WHERE constraint_type = 'FOREIGN KEY' \
-            AND table_schema = 'public' \
+    let query = "SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+        AND table_type = 'BASE TABLE'
+        AND table_name NOT IN (
+            SELECT DISTINCT table_name
+            FROM information_schema.table_constraints
+            WHERE constraint_type = 'FOREIGN KEY'
+            AND table_schema = 'public'
         );".to_string();
 
     let rows = client.query(
