@@ -205,9 +205,9 @@ fn is_table_exists(conn: &Connection, table_name: String) -> bool {
     let mut stmt = conn.prepare("SELECT id FROM tables WHERE name = ?1").unwrap();
     let mut rows = stmt.query(params![table_name]).unwrap();
 
-    rows.next().unwrap_or(None).is_none() == false
+    rows.next().unwrap_or(None).is_none().eq(&false)
 }
-fn get_table_self_references(database_name: &String) {
+fn update_table_self_references(database_name: &String) {
     let mut client = connect(database_name.clone()).unwrap();
     let query = "
         SELECT
@@ -248,7 +248,6 @@ fn get_table_self_references(database_name: &String) {
         let table = build_base_simple_table(table_name.clone(), database_name.clone());
         insert_new_table(&conn, table);
     }
-    conn.close().unwrap();
 }
 
 fn run_database(database_name: String) {
