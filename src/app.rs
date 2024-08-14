@@ -72,20 +72,6 @@ impl eframe::App for TwoDBApp {
                     ui.menu_button("Update", |ui| {
                         self.render_clean_tables_button(ui);
                         self.render_get_empty_tables_button(ui);
-
-                        if ui.button("Get Clean Tables for Target").clicked() {
-                            let database_name = var("POSTGRES_DB_TARGET").unwrap_or(String::from(""));
-                            get_clean_tables(&database_name);
-                            let text = format!("Done Get Clean Tables for {}", database_name);
-                            toasts.add(Toast {
-                                text: text.into(),
-                                kind: ToastKind::Success,
-                                options: ToastOptions::default()
-                                    .duration_in_seconds(5.0)
-                                    .show_progress(true),
-                                ..Default::default()
-                            });
-                        }
                     });
 
                     if self.is_busy.eq(&true) {

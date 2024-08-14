@@ -22,13 +22,13 @@ impl TwoDBApp {
                 .anchor(Align2::RIGHT_BOTTOM, (-10.0, -10.0)) // 10 units from the bottom right corner
                 .direction(egui::Direction::BottomUp);
 
-            let database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
-            get_clean_tables(&database_name);
+            let database_name_source = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
+            get_clean_tables(&database_name_source);
 
-            let database_name = var("POSTGRES_DB_TARGET").unwrap_or(String::from(""));
-            get_clean_tables(&database_name);
+            let database_name_target = var("POSTGRES_DB_TARGET").unwrap_or(String::from(""));
+            get_clean_tables(&database_name_target);
 
-            let text = format!("Done Get Clean Tables for {}", database_name);
+            let text = format!("Done Get Clean Tables for {} and {}", database_name_source, database_name_target);
             thread_toasts.add(Toast {
                 text: text.into(),
                 kind: ToastKind::Success,
