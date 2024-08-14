@@ -12,8 +12,7 @@ fn compare_database() {
     let mut source_client = connect(source_database_name.clone()).unwrap();
     let mut target_client = connect(target_database_name.clone()).unwrap();
 
-    let sqlite_conn = Connection::open("twodb.db").unwrap();
-    let tables_to_compare = get_tables(&sqlite_conn);
+    let tables_to_compare = get_tables();
 
     for table in tables_to_compare {
         let table_name = table.name.clone();
@@ -211,20 +210,21 @@ fn is_table_exists(conn: &Connection, table_name: String) -> bool {
 fn get_table_self_references(database_name: &String) {
     let mut client = connect(database_name.clone()).unwrap();
     let query = "
-    SELECT \
-        conname AS constraint_name, \
-        conrelid::regclass AS table_name, \
-        a.attname AS column_name \
-    FROM \
-        pg_constraint AS c \
-    JOIN \
-        pg_attribute AS a \
-    ON \
-        a.attnum = ANY(c.conkey) AND a.attrelid = c.conrelid \
-    WHERE \
-        c.confrelid = c.conrelid \
-        AND c.contype = 'f' \
-    AND c.conrelid::regclass = c.confrelid::regclass;";
+        SELECT
+            conname AS constraint_name,
+            conrelid::regclass AS table_name,
+            a.attname AS column_name
+        FROM
+            pg_constraint AS c
+        JOIN
+            pg_attribute AS a
+        ON
+            a.attnum = ANY(c.conkey) AND a.attrelid = c.conrelid
+        WHERE
+            c.confrelid = c.conrelid
+            AND c.contype = 'f'
+        AND c.conrelid::regclass = c.confrelid::regclass;
+    ";
 
     let rows = client.query(
         query,
@@ -235,13 +235,17 @@ fn get_table_self_references(database_name: &String) {
     create_tables_table(&conn);
 
     for row in rows {
-        let table = build_base_simple_table(row.get(0), database_name.clone());
+        let table_name: String = row.get(1);
 
         // check if table exists
-        if is_table_exists(&conn, table.name.clone()) {
+        if is_table_exists(&conn, table_name.clone()) {
+            let mut table: Table = build_base_simple_table(table_name, database_name.clone());
+            table.is_self_referencing = true;
+            table.update_row_count();
             continue;
         }
 
+        let table = build_base_simple_table(table_name.clone(), database_name.clone());
         insert_new_table(&conn, table);
     }
     conn.close().unwrap();
