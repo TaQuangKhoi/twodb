@@ -64,8 +64,9 @@ impl Table {
             UPDATE tables
             SET export_order = ?1,
             row_count = ?2,
-            is_self_referencing = ?3
-            WHERE name = ?4
+            is_self_referencing = ?3,
+            self_referencing_column = ?4
+            WHERE name = ?5
         ";
         let sqlite_conn = Connection::open("twodb.db").unwrap();
         sqlite_conn.execute(
@@ -74,6 +75,7 @@ impl Table {
                 self.export_order,
                 self.row_count,
                 self.is_self_referencing,
+                self.self_referencing_column.clone(),
 
                 self.name.clone(), // WHERE
             ],
@@ -136,7 +138,7 @@ pub fn insert_new_table(conn: &Connection, table: Table) {
         row_count
         )
             VALUES (?1, ?2, ?3, ?4, ?5, ?6,
-            ?7
+            ?7,
             ?8
             )",
         params![

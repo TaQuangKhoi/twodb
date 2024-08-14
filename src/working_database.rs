@@ -207,12 +207,12 @@ fn is_table_exists(conn: &Connection, table_name: String) -> bool {
 
     rows.next().unwrap_or(None).is_none().eq(&false)
 }
-fn update_table_self_references(database_name: &String) {
+pub fn update_table_self_references(database_name: &String) {
     let mut client = connect(database_name.clone()).unwrap();
     let query = "
         SELECT
             conname AS constraint_name,
-            conrelid::regclass AS table_name,
+            conrelid::regclass::varchar AS table_name,
             a.attname AS column_name
         FROM
             pg_constraint AS c
@@ -236,16 +236,18 @@ fn update_table_self_references(database_name: &String) {
 
     for row in rows {
         let table_name: String = row.get(1);
+        let self_referencing_column: String = row.get(2);
+
+        let mut table: Table = build_base_simple_table(table_name.clone(), database_name.clone());
+        table.is_self_referencing = true;
+        table.self_referencing_column = self_referencing_column;
 
         // check if table exists
         if is_table_exists(&conn, table_name.clone()) {
-            let mut table: Table = build_base_simple_table(table_name, database_name.clone());
-            table.is_self_referencing = true;
-            table.update_row_count();
+            table.update_table_to_db();
             continue;
         }
 
-        let table = build_base_simple_table(table_name.clone(), database_name.clone());
         insert_new_table(&conn, table);
     }
 }
