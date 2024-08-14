@@ -3,13 +3,14 @@ use crate::database::connect;
 
 #[derive(Debug)]
 pub struct Table {
-    pub id: i32,
+    pub id: i64,
     pub name: String,
     pub table_type: TableType,
     pub export_complexity_type: ExportComplexityType,
     pub database: String,
-    pub export_order: i32,
+    pub export_order: i64,
     pub is_self_referencing: bool,
+    pub self_referencing_column: String,
     pub row_count: i64, // postgres type: int8
 }
 impl Default for Table {
@@ -22,6 +23,7 @@ impl Default for Table {
             database: String::from(""),
             export_order: 0,
             is_self_referencing: false,
+            self_referencing_column: String::from(""),
             row_count: 0,
         }
     }
@@ -37,9 +39,45 @@ impl Table {
             &query,
             &[],
         ).unwrap();
-        // len
         let count: i64 = rows[0].get(0);
         self.row_count = count;
+    }
+
+    pub fn save_row_count_to_db(&mut self) {
+        let query = "
+            UPDATE tables
+            SET row_count = ?1
+            WHERE name = ?2
+        ";
+        let sqlite_conn = Connection::open("twodb.db").unwrap();
+        sqlite_conn.execute(
+            query,
+            params![
+                self.row_count,
+                self.name.clone(), // WHERE
+            ],
+        ).unwrap();
+    }
+
+    pub fn update_table_to_db(&mut self) {
+        let query = "
+            UPDATE tables
+            SET export_order = ?1,
+            row_count = ?2,
+            is_self_referencing = ?3
+            WHERE name = ?4
+        ";
+        let sqlite_conn = Connection::open("twodb.db").unwrap();
+        sqlite_conn.execute(
+            query,
+            params![
+                self.export_order,
+                self.row_count,
+                self.is_self_referencing,
+
+                self.name.clone(), // WHERE
+            ],
+        ).unwrap();
     }
 }
 
@@ -54,6 +92,7 @@ pub fn create_tables_table(conn: &Connection) {
             database TEXT NOT NULL,
             export_order INTEGER NOT NULL,
             is_self_referencing BOOLEAN NOT NULL,
+            self_referencing_column TEXT,
             row_count INTEGER NOT NULL
         )",
         params![],
@@ -68,6 +107,7 @@ pub fn build_base_simple_table(name: String, database: String) -> Table {
         database,
         export_order: 0,
         is_self_referencing: false,
+        self_referencing_column: String::from(""),
         row_count: 0,
     };
     new_table
@@ -81,6 +121,7 @@ pub fn build_self_references_table(name: String, database: String) -> Table {
         database,
         export_order: 0,
         is_self_referencing: true,
+        self_referencing_column: String::from(""),
         row_count: 0,
     };
     new_table
@@ -91,10 +132,12 @@ pub fn insert_new_table(conn: &Connection, table: Table) {
         table_type, export_complexity_type, database,
         export_order,
         is_self_referencing,
+        self_referencing_column,
         row_count
         )
             VALUES (?1, ?2, ?3, ?4, ?5, ?6,
             ?7
+            ?8
             )",
         params![
             table.name,
@@ -103,6 +146,7 @@ pub fn insert_new_table(conn: &Connection, table: Table) {
             table.database,
             table.export_order,
             table.is_self_referencing,
+            table.self_referencing_column,
             table.row_count,
         ],
     ).unwrap();
