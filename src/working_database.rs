@@ -4,7 +4,7 @@ use postgres::error::SqlState;
 use rusqlite::{Connection, params};
 use crate::core::get_tables;
 use crate::database::connect;
-use crate::table::{build_base_simple_table, create_tables_table, insert_new_table};
+use crate::table::{build_base_simple_table, create_tables_table, insert_new_table, Table};
 
 fn compare_database() {
     let source_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
@@ -181,6 +181,23 @@ pub fn get_empty_tables(database_name: &String) {
         query,
         &[],
     ).unwrap();
+
+    let sqlite_conn = Connection::open("twodb.db").unwrap();
+    create_tables_table(&sqlite_conn);
+
+    for row in rows {
+        let table_name: String = row.get(0);
+
+        // check if table exists, update row count
+        if is_table_exists(&sqlite_conn, table_name.clone()) {
+            let mut table: Table = build_base_simple_table(table_name, database_name.clone());
+            table.update_row_count();
+            continue;
+        }
+
+        let mut table: Table = build_base_simple_table(table_name, database_name.clone());
+        insert_new_table(&sqlite_conn, table);
+    }
 }
 fn is_table_exists(conn: &Connection, table_name: String) -> bool {
     let mut stmt = conn.prepare("SELECT id FROM tables WHERE name = ?1").unwrap();
