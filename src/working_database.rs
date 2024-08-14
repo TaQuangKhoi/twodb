@@ -104,11 +104,11 @@ pub fn get_cells(row: &postgres::Row) -> Vec<String> {
     cells
 }
 
-fn get_all_tables(database_name: String) {
-    let mut client = connect(database_name).unwrap();
+pub fn update_all_tables(database_name: &String) {
+    let mut client = connect(database_name.clone()).unwrap();
     let query =
-        "SELECT table_name, table_type \
-        FROM information_schema.tables \
+        "SELECT table_name, table_type
+        FROM information_schema.tables
         WHERE table_schema = 'public'"
             .to_string();
 
@@ -127,7 +127,7 @@ fn get_all_tables(database_name: String) {
         }
     }).filter(|table_name| table_name.len() > 0).collect();
 
-    println!("Total base tables: {}", base_tables.len());
+    println!("Total base tables: {}", base_tables.len().to_string());
 
     for row in rows {
         println!("{}", _row_to_string(&row));
