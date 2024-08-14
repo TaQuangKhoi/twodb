@@ -21,8 +21,8 @@ impl Default for TwoDBApp {
     fn default() -> Self {
         Self {
             // Example stuff:
-            label: "Hello World!".to_owned(),
-            value: 2.7,
+            label: "Hello World! 2".to_owned(),
+            value: 2.6,
             is_busy: false,
         }
     }
@@ -37,10 +37,33 @@ impl TwoDBApp {
         // Load previous app state (if any).
         // Note that you must enable the `persistence` feature for this to work.
         if let Some(storage) = cc.storage {
-            return eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default();
+            let mut app: TwoDBApp = eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default();
+            app.is_busy = false;
+            return app;
         }
 
         Default::default()
+    }
+
+    fn button_get_clean_tables_event(&mut self) {
+        thread::spawn(|| {
+            let mut thread_toasts = Toasts::new()
+                .anchor(Align2::RIGHT_BOTTOM, (-10.0, -10.0)) // 10 units from the bottom right corner
+                .direction(egui::Direction::BottomUp);
+            let database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
+            get_clean_tables(&database_name);
+            let text = format!("Done Get Clean Tables for {}", database_name);
+            thread_toasts.add(Toast {
+                text: text.into(),
+                kind: ToastKind::Success,
+                options: ToastOptions::default()
+                    .duration_in_seconds(5.0)
+                    .show_progress(true),
+                ..Default::default()
+            });
+        });
+        // handle.join().unwrap();
+        // self.is_busy = false;
     }
 }
 
@@ -66,28 +89,14 @@ impl eframe::App for TwoDBApp {
                             ctx.send_viewport_cmd(egui::ViewportCommand::Close);
                         }
                     });
-                    let menu_button =
                     ui.menu_button("Update", |ui| {
                         let button = ui.button("Get Clean Tables for Source");
                         if button.clicked() {
+                            self.is_busy = true;
                             ui.close_menu();
-                            thread::spawn(|| {
-                                let mut thread_toasts = Toasts::new()
-                                    .anchor(Align2::RIGHT_BOTTOM, (-10.0, -10.0)) // 10 units from the bottom right corner
-                                    .direction(egui::Direction::BottomUp);
-                                let database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
-                                get_clean_tables(&database_name);
-                                let text = format!("Done Get Clean Tables for {}", database_name);
-                                thread_toasts.add(Toast {
-                                    text: text.into(),
-                                    kind: ToastKind::Success,
-                                    options: ToastOptions::default()
-                                        .duration_in_seconds(5.0)
-                                        .show_progress(true),
-                                    ..Default::default()
-                                });
-                            });
+                            self.button_get_clean_tables_event();
                         }
+
                         if ui.button("Get Clean Tables for Target").clicked() {
                             let database_name = var("POSTGRES_DB_TARGET").unwrap_or(String::from(""));
                             get_clean_tables(&database_name);
@@ -102,7 +111,12 @@ impl eframe::App for TwoDBApp {
                             });
                         }
                     });
-                    ui.add(egui::Spinner::new());
+
+                    println!("Busy: {}", self.is_busy);
+                    if self.is_busy.eq(&true) {
+                        ui.add(egui::Spinner::new());
+                    }
+
                     ui.add_space(16.0);
                 }
 
@@ -142,6 +156,7 @@ impl eframe::App for TwoDBApp {
 
     /// Called by the framework to save state before shutdown.
     fn save(&mut self, storage: &mut dyn eframe::Storage) {
+        self.is_busy = false;
         eframe::set_value(storage, eframe::APP_KEY, self);
     }
 }
