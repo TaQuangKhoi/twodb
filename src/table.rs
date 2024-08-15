@@ -1,6 +1,6 @@
 use rusqlite::{Connection, params};
 use crate::database::connect;
-use crate::queries::{QUERY_GET_SELF_REFERENCES_BY_TABLE, QUERY_UPDATE_ROW_COUNT};
+use crate::queries::{query_get_self_references_by_table, QUERY_UPDATE_ROW_COUNT};
 
 #[derive(Debug)]
 pub struct Table {
@@ -86,13 +86,13 @@ impl Table {
     pub fn update_self_referencing(&mut self, database_name: &String) -> bool {
         let mut client = connect(database_name.clone()).unwrap();
         let rows = client.query(
-            QUERY_GET_SELF_REFERENCES_BY_TABLE,
+            &query_get_self_references_by_table(),
             &[],
         ).unwrap();
         let result = rows.len() > 0;
 
         if result {
-            let row = rows[0];
+            let row = &rows[0];
             self.is_self_referencing = true;
             self.self_referencing_column = row.get(2);
         }

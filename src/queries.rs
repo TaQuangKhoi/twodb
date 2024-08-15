@@ -7,7 +7,8 @@ pub const QUERY_UPDATE_ROW_COUNT: &str = "
             WHERE name = ?2
         ";
 
-pub const QUERY_GET_SELF_REFERENCES_TABLES: &str = "
+pub fn query_get_self_references_tables() -> &'static str {
+    let query = "
         SELECT
             conname AS constraint_name,
             conrelid::regclass::varchar AS table_name,
@@ -21,9 +22,13 @@ pub const QUERY_GET_SELF_REFERENCES_TABLES: &str = "
         WHERE
             c.confrelid = c.conrelid
             AND c.contype = 'f'
-        AND c.conrelid::regclass = c.confrelid::regclass;
+        AND c.conrelid::regclass = c.confrelid::regclass
     ";
+    query
+}
 
-pub const QUERY_GET_SELF_REFERENCES_BY_TABLE: &str = &*(|| {
-    format!("{} WHERE table_name = ?1", QUERY_GET_SELF_REFERENCES_TABLES)
-})();
+pub fn query_get_self_references_by_table() -> String {
+    let condition = " AND table_name = ?1";
+    let query = query_get_self_references_tables();
+    query.to_owned() + condition
+}

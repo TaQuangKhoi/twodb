@@ -1,7 +1,6 @@
 /*! This file contains the core logic of the application. */
 
 use rusqlite::{Connection, params};
-use crate::database::connect;
 use crate::table::{ExportComplexityType, Table, TableType};
 
 /// Get all tables from the SQLite database
