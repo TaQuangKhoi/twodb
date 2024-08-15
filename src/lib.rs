@@ -7,3 +7,4 @@ mod database;
 mod table;
 mod core;
 mod widgets;
+mod queries;
