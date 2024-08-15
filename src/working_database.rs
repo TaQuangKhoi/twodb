@@ -4,6 +4,7 @@ use postgres::error::SqlState;
 use rusqlite::{Connection};
 use crate::core::get_tables;
 use crate::database::connect;
+use crate::queries::query_get_self_references_tables;
 use crate::table::{build_base_simple_table, create_tables_table, insert_new_table, Table};
 
 fn compare_database() {
@@ -205,22 +206,7 @@ pub fn update_empty_tables(database_name: &String) {
 }
 pub fn update_table_self_references(database_name: &String) {
     let mut client = connect(database_name.clone()).unwrap();
-    let query = "
-        SELECT
-            conname AS constraint_name,
-            conrelid::regclass::varchar AS table_name,
-            a.attname AS column_name
-        FROM
-            pg_constraint AS c
-        JOIN
-            pg_attribute AS a
-        ON
-            a.attnum = ANY(c.conkey) AND a.attrelid = c.conrelid
-        WHERE
-            c.confrelid = c.conrelid
-            AND c.contype = 'f'
-        AND c.conrelid::regclass = c.confrelid::regclass;
-    ";
+    let query = query_get_self_references_tables();
 
     let rows = client.query(
         query,

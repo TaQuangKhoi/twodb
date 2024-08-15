@@ -1,6 +1,7 @@
 use rusqlite::{Connection, params};
 use crate::database::connect;
-use crate::queries::{query_get_self_references_by_table, QUERY_UPDATE_ROW_COUNT};
+use crate::queries::query_get_self_references_by_table;
+use crate::sqlite_queries::query_update_row_count;
 
 #[derive(Debug)]
 pub struct Table {
@@ -47,7 +48,7 @@ impl Table {
     pub fn save_row_count_to_db(&mut self) {
         let sqlite_conn = Connection::open("twodb.db").unwrap();
         sqlite_conn.execute(
-            QUERY_UPDATE_ROW_COUNT,
+            query_update_row_count(),
             params![
                 self.row_count,
                 self.name.clone(), // WHERE

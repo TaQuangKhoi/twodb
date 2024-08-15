@@ -1,12 +1,5 @@
 use std::clone::Clone;
-use std::string::ToString;
-
-pub const QUERY_UPDATE_ROW_COUNT: &str = "
-            UPDATE tables
-            SET row_count = ?1
-            WHERE name = ?2
-        ";
-
+/// SQL dialect: PostgreSQL
 pub fn query_get_self_references_tables() -> &'static str {
     let query = "
         SELECT
