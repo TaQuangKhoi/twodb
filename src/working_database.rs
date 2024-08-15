@@ -122,7 +122,7 @@ pub fn update_all_tables(database_name: &String) {
     create_tables_table(&sqlite_conn);
 
     for row in rows {
-        let table_name: String = row.get(1);
+        let table_name: String = row.get(0);
 
         let mut table: Table = build_base_simple_table(table_name.clone(), database_name.clone());
         table.update_self_referencing(database_name);
