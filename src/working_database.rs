@@ -128,8 +128,7 @@ pub fn update_all_tables(database_name: &String) {
         table.update_self_referencing(database_name);
 
         // check if table exists
-        if is_table_exists(&sqlite_conn, table_name.clone()) {
-
+        if table.is_table_exists() {
             table.update_table_to_db();
             continue;
         }
@@ -161,10 +160,11 @@ pub fn update_clean_tables(database_name: &String) {
     create_tables_table(&conn);
 
     for row in rows {
-        let mut table = build_base_simple_table(row.get(0), database_name.clone());
+        let table_name: String = row.get(0);
+        let mut table = build_base_simple_table(table_name, database_name.clone());
         table.update_row_count();
         // check if table exists
-        if is_table_exists(&conn, table.name.clone()) {
+        if table.is_table_exists() {
             continue;
         }
 
@@ -192,23 +192,16 @@ pub fn update_empty_tables(database_name: &String) {
 
     for row in rows {
         let table_name: String = row.get(1);
+        let mut table: Table = build_base_simple_table(table_name, database_name.clone());
 
         // check if table exists, update row count
-        if is_table_exists(&sqlite_conn, table_name.clone()) {
-            let mut table: Table = build_base_simple_table(table_name, database_name.clone());
+        if table.is_table_exists() {
             table.update_row_count();
             continue;
         }
 
-        let table: Table = build_base_simple_table(table_name, database_name.clone());
         insert_new_table(&sqlite_conn, table);
     }
-}
-fn is_table_exists(conn: &Connection, table_name: String) -> bool {
-    let mut stmt = conn.prepare("SELECT id FROM tables WHERE name = ?1").unwrap();
-    let mut rows = stmt.query(params![table_name]).unwrap();
-
-    rows.next().unwrap_or(None).is_none().eq(&false)
 }
 pub fn update_table_self_references(database_name: &String) {
     let mut client = connect(database_name.clone()).unwrap();
@@ -246,7 +239,7 @@ pub fn update_table_self_references(database_name: &String) {
         table.self_referencing_column = self_referencing_column;
 
         // check if table exists
-        if is_table_exists(&conn, table_name.clone()) {
+        if table.is_table_exists() {
             table.update_table_to_db();
             continue;
         }

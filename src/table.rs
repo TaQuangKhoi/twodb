@@ -99,6 +99,25 @@ impl Table {
         }
         result
     }
+
+    /// Check in SQLite if the table exists
+    pub fn is_table_exists(&self) -> bool {
+        let sqlite_conn = Connection::open("twodb.db").unwrap();
+        let mut stmt = sqlite_conn.prepare(
+            "
+            SELECT id
+            FROM tables
+            WHERE name = ?1
+            AND database = ?2
+            "
+        ).unwrap();
+        let mut rows = stmt.query(params![
+            self.name,
+            self.database,
+        ]).unwrap();
+
+        rows.next().unwrap_or(None).is_none().eq(&false)
+    }
 }
 
 /// Create a new table named `tables` in the SQLite database
