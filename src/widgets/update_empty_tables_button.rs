@@ -21,7 +21,7 @@ impl TwoDBApp {
         thread::spawn(move || {
             let database_name_source = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
             update_empty_tables(&database_name_source);
-            //
+
             let database_name_target = var("POSTGRES_DB_TARGET").unwrap_or(String::from(""));
             update_empty_tables(&database_name_target);
 

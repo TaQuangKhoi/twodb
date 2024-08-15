@@ -29,9 +29,7 @@ impl TwoDBApp {
 
             /// Notify
             let text = format!("Done Get Clean Tables for {} and {}", database_name_source, database_name_target);
-            println!("{}", text.clone());
-            *is_busy.lock().unwrap() = false;
-            *toast_text.lock().unwrap() = text;
+            TwoDBApp::notify(text, is_busy, toast_text);
         });
     }
 }
