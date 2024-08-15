@@ -13,6 +13,10 @@ impl TwoDBApp {
     }
 
     fn button_update_self_referencing_tables_event(&mut self) {
+        let is_busy = self.is_busy.clone();
+        *is_busy.lock().unwrap() = true;
+        let toast_text = self.toast_text.clone();
+
         thread::spawn(move || {
             let database_name_source = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
             update_table_self_references(&database_name_source);
@@ -21,7 +25,7 @@ impl TwoDBApp {
             update_table_self_references(&database_name_target);
 
             let text = format!("Done Get Tables for {} and {}", database_name_source, database_name_target);
-            println!("{}", text);
+            TwoDBApp::notify(text, is_busy, toast_text);
         });
     }
 }
