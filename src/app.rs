@@ -14,7 +14,7 @@ pub struct TwoDBApp {
 
     pub is_busy_old: bool, // This field is for Spinner
 
-    pub is_busy: Arc<Mutex<bool>>,
+    pub is_busy: Arc<Mutex<bool>>, // for synchronize thread
     pub field: Arc<Mutex<i128>>,
 }
 
@@ -41,7 +41,14 @@ impl TwoDBApp {
         // Note that you must enable the `persistence` feature for this to work.
         if let Some(storage) = cc.storage {
             let mut app: TwoDBApp = eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default();
-            app.is_busy_old = false;
+
+            {
+                println!("App loaded");
+                /// Reset is_busy to false
+                let is_busy = app.is_busy.clone();
+                *is_busy.lock().unwrap() = false;
+            }
+
             return app;
         }
 
@@ -78,7 +85,7 @@ impl eframe::App for TwoDBApp {
                         self.render_get_empty_tables_button(ui);
                     });
 
-                    if self.is_busy_old.eq(&true) {
+                    if self.is_busy.lock().unwrap().clone() {
                         ui.add(egui::Spinner::new());
                     }
 
@@ -126,8 +133,8 @@ impl eframe::App for TwoDBApp {
     }
 
     /// Called by the framework to save state before shutdown.
+    /// Notes by Keios: this fn can be call despite the app is not closing
     fn save(&mut self, storage: &mut dyn eframe::Storage) {
-        self.is_busy_old = false;
         eframe::set_value(storage, eframe::APP_KEY, self);
     }
 }

@@ -1,7 +1,7 @@
 use std::env::var;
 use std::time::SystemTime;
 use postgres::error::SqlState;
-use rusqlite::{Connection, params};
+use rusqlite::{Connection};
 use crate::core::get_tables;
 use crate::database::connect;
 use crate::table::{build_base_simple_table, create_tables_table, insert_new_table, Table};
