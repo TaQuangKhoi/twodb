@@ -1,6 +1,6 @@
 use rusqlite::{Connection, params};
 use crate::database::connect;
-use crate::queries::query_get_self_references_by_table;
+use crate::postgresql_queries::query_get_self_references_by_table;
 use crate::sqlite_queries::query_update_row_count;
 
 #[derive(Debug)]

@@ -4,7 +4,7 @@ use postgres::error::SqlState;
 use rusqlite::{Connection};
 use crate::core::get_tables;
 use crate::database::connect;
-use crate::queries::query_get_self_references_tables;
+use crate::postgresql_queries::query_get_self_references_tables;
 use crate::table::{build_base_simple_table, create_tables_table, insert_new_table, Table};
 
 fn compare_database() {
