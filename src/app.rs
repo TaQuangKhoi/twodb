@@ -15,7 +15,6 @@ pub struct TwoDBApp {
     pub is_busy_old: bool, // This field is for Spinner
 
     pub is_busy: Arc<Mutex<bool>>, // for synchronize thread
-    pub field: Arc<Mutex<i128>>,
 
     pub toast_text: Arc<Mutex<String>>,
 }
@@ -28,7 +27,6 @@ impl Default for TwoDBApp {
             value: 2.6,
             is_busy_old: false,
             is_busy: Arc::new(Mutex::new(false)),
-            field: Arc::new(Mutex::new(0)),
             toast_text: Arc::new(Mutex::new("".to_owned())),
         }
     }
@@ -50,6 +48,8 @@ impl TwoDBApp {
                 /// Reset is_busy to false
                 let is_busy = app.is_busy.clone();
                 *is_busy.lock().unwrap() = false;
+
+                app.toast_text.lock().unwrap().clear();
             }
 
             return app;
@@ -104,12 +104,6 @@ impl eframe::App for TwoDBApp {
             ui.heading("Clean Tables");
 
             ui.horizontal(|ui| {
-                ui.label(
-                    format!("{}", self.field.lock().unwrap())
-                );
-            });
-
-            ui.horizontal(|ui| {
                 ui.label("Write something: ");
                 ui.text_edit_singleline(&mut self.label);
             });
@@ -133,7 +127,6 @@ impl eframe::App for TwoDBApp {
         });
 
         let mut toast_text = self.toast_text.lock().unwrap().clone();
-        println!("Toast text: {}", toast_text);
         if !toast_text.is_empty() {
             let text = toast_text.clone();
             toasts.add(egui_toast::Toast {
