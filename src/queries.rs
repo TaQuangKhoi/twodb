@@ -27,8 +27,9 @@ pub fn query_get_self_references_tables() -> &'static str {
     query
 }
 
+/// SQL dialect: PostgreSQL
 pub fn query_get_self_references_by_table() -> String {
-    let condition = " AND table_name = ?1";
+    let condition = " AND conrelid::regclass::varchar = $1";
     let query = query_get_self_references_tables();
     query.to_owned() + condition
 }
