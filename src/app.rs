@@ -16,6 +16,8 @@ pub struct TwoDBApp {
 
     pub is_busy: Arc<Mutex<bool>>, // for synchronize thread
     pub field: Arc<Mutex<i128>>,
+
+    pub toast_text: Arc<Mutex<String>>,
 }
 
 impl Default for TwoDBApp {
@@ -27,6 +29,7 @@ impl Default for TwoDBApp {
             is_busy_old: false,
             is_busy: Arc::new(Mutex::new(false)),
             field: Arc::new(Mutex::new(0)),
+            toast_text: Arc::new(Mutex::new("".to_owned())),
         }
     }
 }
@@ -128,6 +131,21 @@ impl eframe::App for TwoDBApp {
                 egui::warn_if_debug_build(ui);
             });
         });
+
+        let mut toast_text = self.toast_text.lock().unwrap().clone();
+        println!("Toast text: {}", toast_text);
+        if !toast_text.is_empty() {
+            let text = toast_text.clone();
+            toasts.add(egui_toast::Toast {
+                text: text.into(),
+                kind: egui_toast::ToastKind::Success,
+                options: egui_toast::ToastOptions::default()
+                    .duration_in_seconds(5.0)
+                    .show_progress(true),
+                ..Default::default()
+            });
+            self.toast_text.lock().unwrap().clear();
+        }
 
         toasts.show(ctx);
     }
