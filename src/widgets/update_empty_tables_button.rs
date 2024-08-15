@@ -9,7 +9,7 @@ use crate::working_database::update_empty_tables;
 impl TwoDBApp {
     pub fn render_get_empty_tables_button(&mut self, ui: &mut Ui) {
         if ui.button("Update Empty Tables").clicked() {
-            self.is_busy = true;
+            self.is_busy_old = true;
             ui.close_menu();
             self.get_empty_tables_event();
         }

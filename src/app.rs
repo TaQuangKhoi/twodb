@@ -1,9 +1,6 @@
 use egui::Align2;
 use egui_toast::{Toasts};
-use std::{
-    sync::{Arc, Mutex},
-    time::Duration,
-};
+use std::sync::{Arc, Mutex};
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
@@ -15,8 +12,9 @@ pub struct TwoDBApp {
     #[serde(skip)] // This how you opt-out of serialization of a field
     value: f32,
 
-    pub(crate) is_busy: bool, // This field is for Spinner
+    pub is_busy_old: bool, // This field is for Spinner
 
+    pub is_busy: Arc<Mutex<bool>>,
     pub field: Arc<Mutex<i128>>,
 }
 
@@ -26,7 +24,8 @@ impl Default for TwoDBApp {
             // Example stuff:
             label: "Hello World! 2".to_owned(),
             value: 2.6,
-            is_busy: false,
+            is_busy_old: false,
+            is_busy: Arc::new(Mutex::new(false)),
             field: Arc::new(Mutex::new(0)),
         }
     }
@@ -42,7 +41,7 @@ impl TwoDBApp {
         // Note that you must enable the `persistence` feature for this to work.
         if let Some(storage) = cc.storage {
             let mut app: TwoDBApp = eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default();
-            app.is_busy = false;
+            app.is_busy_old = false;
             return app;
         }
 
@@ -79,7 +78,7 @@ impl eframe::App for TwoDBApp {
                         self.render_get_empty_tables_button(ui);
                     });
 
-                    if self.is_busy.eq(&true) {
+                    if self.is_busy_old.eq(&true) {
                         ui.add(egui::Spinner::new());
                     }
 
@@ -128,7 +127,7 @@ impl eframe::App for TwoDBApp {
 
     /// Called by the framework to save state before shutdown.
     fn save(&mut self, storage: &mut dyn eframe::Storage) {
-        self.is_busy = false;
+        self.is_busy_old = false;
         eframe::set_value(storage, eframe::APP_KEY, self);
     }
 }

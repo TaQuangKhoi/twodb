@@ -9,7 +9,7 @@ use crate::working_database::update_clean_tables;
 impl TwoDBApp {
     pub fn render_clean_tables_button(&mut self, ui: &mut Ui) {
         if ui.button("Update Clean Tables").clicked() {
-            self.is_busy = true;
+            self.is_busy_old = true;
             ui.close_menu();
             self.button_get_clean_tables_event();
         }
