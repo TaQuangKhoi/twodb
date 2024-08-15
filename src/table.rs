@@ -1,5 +1,6 @@
 use rusqlite::{Connection, params};
 use crate::database::connect;
+use crate::queries::{QUERY_GET_SELF_REFERENCES_BY_TABLE, QUERY_UPDATE_ROW_COUNT};
 
 #[derive(Debug)]
 pub struct Table {
@@ -44,14 +45,9 @@ impl Table {
     }
 
     pub fn save_row_count_to_db(&mut self) {
-        let query = "
-            UPDATE tables
-            SET row_count = ?1
-            WHERE name = ?2
-        ";
         let sqlite_conn = Connection::open("twodb.db").unwrap();
         sqlite_conn.execute(
-            query,
+            QUERY_UPDATE_ROW_COUNT,
             params![
                 self.row_count,
                 self.name.clone(), // WHERE
@@ -62,10 +58,13 @@ impl Table {
     pub fn update_table_to_db(&mut self) {
         let query = "
             UPDATE tables
-            SET export_order = ?1,
+            SET
+
+            export_order = ?1,
             row_count = ?2,
             is_self_referencing = ?3,
             self_referencing_column = ?4
+
             WHERE name = ?5
         ";
         let sqlite_conn = Connection::open("twodb.db").unwrap();
@@ -80,6 +79,24 @@ impl Table {
                 self.name.clone(), // WHERE
             ],
         ).unwrap();
+    }
+
+    /// Call to Postgres to check if the table is self-referencing
+    /// Save the result to the struct
+    pub fn update_self_referencing(&mut self, database_name: &String) -> bool {
+        let mut client = connect(database_name.clone()).unwrap();
+        let rows = client.query(
+            QUERY_GET_SELF_REFERENCES_BY_TABLE,
+            &[],
+        ).unwrap();
+        let result = rows.len() > 0;
+
+        if result {
+            let row = rows[0];
+            self.is_self_referencing = true;
+            self.self_referencing_column = row.get(2);
+        }
+        result
     }
 }
 
