@@ -85,9 +85,10 @@ impl Table {
     /// Save the result to the struct
     pub fn update_self_referencing(&mut self, database_name: &String) -> bool {
         let mut client = connect(database_name.clone()).unwrap();
+        // check name of self
         let rows = client.query(
             &query_get_self_references_by_table(),
-            &[],
+            &[&self.name],
         ).unwrap();
         let result = rows.len() > 0;
 
