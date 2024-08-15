@@ -87,6 +87,9 @@ impl eframe::App for TwoDBApp {
                         self.render_clean_tables_button(ui);
                         self.render_get_empty_tables_button(ui);
                     });
+                    ui.menu_button("Migrate Data", |ui|{
+
+                    });
 
                     if self.is_busy.lock().unwrap().clone() {
                         ui.add(egui::Spinner::new());
