@@ -16,7 +16,9 @@ impl TwoDBApp {
     }
 
     fn get_empty_tables_event(&mut self) {
+        let field = self.field.clone();
         thread::spawn(move || {
+            *field.lock().unwrap() += 1;
             let mut thread_toasts = Toasts::new()
                 .anchor(Align2::RIGHT_BOTTOM, (-10.0, -10.0)) // 10 units from the bottom right corner
                 .direction(egui::Direction::BottomUp);

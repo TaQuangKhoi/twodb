@@ -1,5 +1,9 @@
 use egui::Align2;
 use egui_toast::{Toasts};
+use std::{
+    sync::{Arc, Mutex},
+    time::Duration,
+};
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
@@ -12,6 +16,8 @@ pub struct TwoDBApp {
     value: f32,
 
     pub(crate) is_busy: bool, // This field is for Spinner
+
+    pub field: Arc<Mutex<i128>>,
 }
 
 impl Default for TwoDBApp {
@@ -21,6 +27,7 @@ impl Default for TwoDBApp {
             label: "Hello World! 2".to_owned(),
             value: 2.6,
             is_busy: false,
+            field: Arc::new(Mutex::new(0)),
         }
     }
 }
@@ -86,6 +93,12 @@ impl eframe::App for TwoDBApp {
         egui::CentralPanel::default().show(ctx, |ui| {
             // The central panel the region left after adding TopPanel's and SidePanel's
             ui.heading("Clean Tables");
+
+            ui.horizontal(|ui| {
+                ui.label(
+                    format!("{}", self.field.lock().unwrap())
+                );
+            });
 
             ui.horizontal(|ui| {
                 ui.label("Write something: ");
