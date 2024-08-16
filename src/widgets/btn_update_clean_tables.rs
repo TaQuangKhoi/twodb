@@ -2,7 +2,7 @@ use std::env::var;
 use std::thread;
 use egui::Ui;
 use crate::TwoDBApp;
-use crate::working_database::update_clean_tables;
+use crate::action::working_database::update_clean_tables;
 
 impl TwoDBApp {
     pub fn render_clean_tables_button(&mut self, ui: &mut Ui) {

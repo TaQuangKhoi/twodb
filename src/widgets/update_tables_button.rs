@@ -1,7 +1,7 @@
 use std::env::var;
 use std::thread;
 use crate::TwoDBApp;
-use crate::working_database::{update_all_tables};
+use crate::action::working_database::{update_all_tables};
 
 impl TwoDBApp {
     pub fn render_update_tables_button(&mut self, ui: &mut egui::Ui) {

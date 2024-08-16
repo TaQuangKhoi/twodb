@@ -2,7 +2,7 @@ use egui::Ui;
 use std::env::var;
 use std::thread;
 use crate::TwoDBApp;
-use crate::working_database::update_table_self_references;
+use crate::action::working_database::update_table_self_references;
 
 impl TwoDBApp {
     pub fn render_update_self_referencing_tables_button(&mut self, ui: &mut Ui) {

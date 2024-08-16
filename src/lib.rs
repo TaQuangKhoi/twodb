@@ -3,7 +3,6 @@
 mod app;
 pub use app::TwoDBApp;
 mod core;
-mod working_database;
 mod database;
 mod widgets;
 mod postgresql_queries;
