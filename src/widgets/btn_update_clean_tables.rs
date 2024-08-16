@@ -1,8 +1,6 @@
 use std::env::var;
 use std::thread;
-use eframe::emath::Align2;
 use egui::Ui;
-use egui_toast::{Toast, ToastKind, ToastOptions, Toasts};
 use crate::TwoDBApp;
 use crate::working_database::update_clean_tables;
 

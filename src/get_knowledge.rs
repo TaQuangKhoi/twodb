@@ -1,11 +1,9 @@
-/*! This file contains the core logic of the application. */
-
 use rusqlite::{Connection, params};
 use crate::table::{ExportComplexityType, Table, TableType};
 
 /// Get all tables from the SQLite database
 pub fn get_tables() -> Vec<Table> {
-    let sqlite_conn = Connection::open("twodb.db").unwrap();
+    let sqlite_conn = Connection::open("../twodb.db").unwrap();
     let mut stmt = sqlite_conn.prepare(
         "SELECT
             id,
