@@ -11,4 +11,3 @@ mod postgresql_queries;
 mod app_fn_impl;
 mod preparation;
 mod sqlite_queries;
-mod get_knowledge;
