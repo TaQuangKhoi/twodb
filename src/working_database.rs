@@ -5,7 +5,9 @@ use rusqlite::{Connection};
 use crate::core::get_knowledge::get_tables;
 use crate::database::connect;
 use crate::postgresql_queries::query_get_self_references_tables;
-use crate::table::{build_base_simple_table, create_tables_table, insert_new_table, Table};
+use crate::core::table::{build_base_simple_table, create_tables_table, insert_new_table, Table};
+
+const SQLITE_DATABASE_PATH: &str = "twodb.db";
 
 fn compare_database() {
     let source_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
@@ -119,7 +121,7 @@ pub fn update_all_tables(database_name: &String) {
         &[],
     ).unwrap();
 
-    let sqlite_conn = Connection::open("twodb.db").unwrap();
+    let sqlite_conn = Connection::open(SQLITE_DATABASE_PATH).unwrap();
     create_tables_table(&sqlite_conn);
 
     for row in rows {
@@ -157,7 +159,7 @@ pub fn update_clean_tables(database_name: &String) {
         &[],
     ).unwrap();
 
-    let conn = Connection::open("twodb.db").unwrap();
+    let conn = Connection::open(SQLITE_DATABASE_PATH).unwrap();
     create_tables_table(&conn);
 
     for row in rows {
@@ -188,7 +190,7 @@ pub fn update_empty_tables(database_name: &String) {
         &[],
     ).unwrap();
 
-    let sqlite_conn = Connection::open("twodb.db").unwrap();
+    let sqlite_conn = Connection::open(SQLITE_DATABASE_PATH).unwrap();
     create_tables_table(&sqlite_conn);
 
     for row in rows {
@@ -213,7 +215,7 @@ pub fn update_table_self_references(database_name: &String) {
         &[],
     ).unwrap();
 
-    let conn = Connection::open("twodb.db").unwrap();
+    let conn = Connection::open(SQLITE_DATABASE_PATH).unwrap();
     create_tables_table(&conn);
 
     for row in rows {

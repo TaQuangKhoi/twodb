@@ -3,6 +3,8 @@ use crate::database::connect;
 use crate::postgresql_queries::query_get_self_references_by_table;
 use crate::sqlite_queries::query_update_row_count;
 
+const SQLITE_DATABASE_PATH: &str = "twodb.db";
+
 #[derive(Debug)]
 pub struct Table {
     pub id: i64,
@@ -46,7 +48,7 @@ impl Table {
     }
 
     pub fn save_row_count_to_db(&mut self) {
-        let sqlite_conn = Connection::open("twodb.db").unwrap();
+        let sqlite_conn = Connection::open(SQLITE_DATABASE_PATH).unwrap();
         sqlite_conn.execute(
             query_update_row_count(),
             params![
@@ -68,7 +70,7 @@ impl Table {
 
             WHERE name = ?5
         ";
-        let sqlite_conn = Connection::open("twodb.db").unwrap();
+        let sqlite_conn = Connection::open(SQLITE_DATABASE_PATH).unwrap();
         sqlite_conn.execute(
             query,
             params![
@@ -103,7 +105,7 @@ impl Table {
 
     /// Check in SQLite if the table exists
     pub fn is_table_exists(&self) -> bool {
-        let sqlite_conn = Connection::open("twodb.db").unwrap();
+        let sqlite_conn = Connection::open(SQLITE_DATABASE_PATH).unwrap();
         let mut stmt = sqlite_conn.prepare(
             "
             SELECT id
