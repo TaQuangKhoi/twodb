@@ -90,6 +90,9 @@ impl eframe::App for TwoDBApp {
                     ui.menu_button("Migrate Data", |ui|{
 
                     });
+                    ui.menu_button("Settings", |ui|{
+
+                    });
 
                     if self.is_busy.lock().unwrap().clone() {
                         ui.add(egui::Spinner::new());
