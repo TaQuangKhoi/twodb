@@ -17,6 +17,7 @@ pub struct TwoDBApp {
     pub is_busy: Arc<Mutex<bool>>, // for synchronize thread
 
     pub toast_text: Arc<Mutex<String>>,
+    selected : Enum,
 }
 
 impl Default for TwoDBApp {
@@ -29,6 +30,7 @@ impl Default for TwoDBApp {
             is_busy_old: false,
             is_busy: Arc::new(Mutex::new(false)),
             toast_text: Arc::new(Mutex::new("".to_owned())),
+            selected: Enum::First,
         }
     }
 }
@@ -61,6 +63,13 @@ impl TwoDBApp {
     }
 }
 
+#[derive(PartialEq, Debug, serde::Deserialize, serde::Serialize)]
+enum Enum {
+    First,
+    Second,
+    Third,
+}
+
 impl eframe::App for TwoDBApp {
     /// Called each time the UI needs repainting, which may be many times per second.
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
@@ -69,10 +78,19 @@ impl eframe::App for TwoDBApp {
             .direction(egui::Direction::BottomUp);
 
         if self.window_open {
-            egui::Window::new("Modal Window")
+            egui::Window::new("Choose a table")
                 .open(&mut self.window_open)
+                .anchor(Align2::CENTER_CENTER, (0.0, 0.0))
                 .show(ctx, |ui| {
                     ui.label("contents");
+                    egui::ComboBox::from_label("Select one!")
+                        .selected_text(format!("{:?}", self.selected))
+                        .show_ui(ui, |ui| {
+                            ui.selectable_value(&mut self.selected, Enum::First, "First 1");
+                            ui.selectable_value(&mut self.selected, Enum::Second, "Second 2");
+                            ui.selectable_value(&mut self.selected, Enum::Third, "Third 3");
+                        },
+                        );
                 });
         }
 
@@ -98,9 +116,7 @@ impl eframe::App for TwoDBApp {
                         self.render_get_empty_tables_button(ui);
                     });
                     self.menu_btn_migrate_data_render(ctx, ui);
-                    ui.menu_button("Settings", |ui|{
-
-                    });
+                    ui.menu_button("Settings", |ui| {});
 
                     if self.is_busy.lock().unwrap().clone() {
                         ui.add(egui::Spinner::new());
