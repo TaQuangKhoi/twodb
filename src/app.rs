@@ -87,9 +87,7 @@ impl eframe::App for TwoDBApp {
                         self.render_clean_tables_button(ui);
                         self.render_get_empty_tables_button(ui);
                     });
-                    ui.menu_button("Migrate Data", |ui|{
-
-                    });
+                    self.menu_btn_migrate_data_render(ui);
                     ui.menu_button("Settings", |ui|{
 
                     });
