@@ -140,41 +140,6 @@ pub fn update_all_tables(database_name: &String) {
         insert_new_table(&sqlite_conn, table);
     }
 }
-/// Get all tables that do not have foreign keys
-/// then save them to the tables table
-pub fn update_clean_tables(database_name: &String) {
-    let mut client = connect(database_name.clone()).unwrap();
-    let query = "SELECT table_name
-        FROM information_schema.tables
-        WHERE table_schema = 'public'
-        AND table_type = 'BASE TABLE'
-        AND table_name NOT IN (
-            SELECT DISTINCT table_name
-            FROM information_schema.table_constraints
-            WHERE constraint_type = 'FOREIGN KEY'
-            AND table_schema = 'public'
-        );".to_string();
-
-    let rows = client.query(
-        &query,
-        &[],
-    ).unwrap();
-
-    let conn = Connection::open(SQLITE_DATABASE_PATH).unwrap();
-    create_tables_table(&conn);
-
-    for row in rows {
-        let table_name: String = row.get(0);
-        let mut table = build_base_simple_table(table_name, database_name.clone());
-        table.update_row_count();
-        // check if table exists
-        if table.is_table_exists() {
-            continue;
-        }
-
-        insert_new_table(&conn, table);
-    }
-}
 
 fn run_database(database_name: String) {
     let mut client = match connect(database_name) {
