@@ -105,3 +105,36 @@ pub fn update_clean_tables(database_name: &String) {
         insert_new_table(&conn, table);
     }
 }
+
+pub fn update_all_tables(database_name: &String) {
+    let mut client = connect(database_name.clone()).unwrap();
+    let query = "
+        SELECT table_name, table_type
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+        AND table_type = 'BASE TABLE'
+        ".to_string();
+
+    let rows = client.query(
+        &query,
+        &[],
+    ).unwrap();
+
+    let sqlite_conn = Connection::open(SQLITE_DATABASE_PATH).unwrap();
+    create_tables_table(&sqlite_conn);
+
+    for row in rows {
+        let table_name: String = row.get(0);
+
+        let mut table: Table = build_base_simple_table(table_name.clone(), database_name.clone());
+        table.update_self_referencing(database_name);
+
+        // check if table exists
+        if table.is_table_exists() {
+            table.update_table_to_db();
+            continue;
+        }
+
+        insert_new_table(&sqlite_conn, table);
+    }
+}
