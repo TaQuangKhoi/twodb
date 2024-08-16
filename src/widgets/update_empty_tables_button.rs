@@ -2,7 +2,7 @@ use std::env::var;
 use std::thread;
 use egui::Ui;
 use crate::TwoDBApp;
-use crate::action::working_database::update_empty_tables;
+use crate::action::update::update_empty_tables;
 
 impl TwoDBApp {
     pub fn render_get_empty_tables_button(&mut self, ui: &mut Ui) {
