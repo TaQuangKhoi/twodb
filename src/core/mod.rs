@@ -2,3 +2,4 @@
 
 pub mod get_knowledge;
 pub mod table;
+mod sqlite_queries;
