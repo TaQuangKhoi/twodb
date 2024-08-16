@@ -11,7 +11,7 @@ pub struct TwoDBApp {
 
     #[serde(skip)] // This how you opt-out of serialization of a field
     value: f32,
-
+    pub(crate) window_open: bool,
     pub is_busy_old: bool, // This field is for Spinner
 
     pub is_busy: Arc<Mutex<bool>>, // for synchronize thread
@@ -25,6 +25,7 @@ impl Default for TwoDBApp {
             // Example stuff:
             label: "Hello World! 2".to_owned(),
             value: 2.6,
+            window_open: false,
             is_busy_old: false,
             is_busy: Arc::new(Mutex::new(false)),
             toast_text: Arc::new(Mutex::new("".to_owned())),
@@ -44,10 +45,11 @@ impl TwoDBApp {
             let mut app: TwoDBApp = eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default();
 
             {
-                println!("App loaded");
                 /// Reset is_busy to false
                 let is_busy = app.is_busy.clone();
                 *is_busy.lock().unwrap() = false;
+
+                app.window_open = false;
 
                 app.toast_text.lock().unwrap().clear();
             }
@@ -65,6 +67,14 @@ impl eframe::App for TwoDBApp {
         let mut toasts = Toasts::new()
             .anchor(Align2::RIGHT_BOTTOM, (-10.0, -10.0)) // 10 units from the bottom right corner
             .direction(egui::Direction::BottomUp);
+
+        if self.window_open {
+            egui::Window::new("Modal Window")
+                .open(&mut self.window_open)
+                .show(ctx, |ui| {
+                    ui.label("contents");
+                });
+        }
 
         // Put your widgets into a `SidePanel`, `TopBottomPanel`, `CentralPanel`, `Window` or `Area`.
         // For inspiration and more examples, go to https://emilk.github.io/egui
@@ -87,7 +97,7 @@ impl eframe::App for TwoDBApp {
                         self.render_clean_tables_button(ui);
                         self.render_get_empty_tables_button(ui);
                     });
-                    self.menu_btn_migrate_data_render(ui);
+                    self.menu_btn_migrate_data_render(ctx, ui);
                     ui.menu_button("Settings", |ui|{
 
                     });
