@@ -9,6 +9,7 @@ use crate::core::table::{build_base_simple_table, create_tables_table, insert_ne
 
 const SQLITE_DATABASE_PATH: &str = "twodb.db";
 
+/// Compare two databases (PostgreSQL)
 fn compare_database() {
     let source_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
     let target_database_name = var("POSTGRES_DB_TARGET").unwrap_or(String::from(""));
@@ -70,6 +71,7 @@ fn _row_to_string(row: &postgres::Row) -> String {
     format!("{:?}", get_cells(row))
 }
 
+/// Get cells from a row based on the column type
 pub fn get_cells(row: &postgres::Row) -> Vec<String> {
     let columns = row.columns();
     let cells: Vec<String> = columns.iter().map(|column| {
