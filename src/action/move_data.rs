@@ -9,6 +9,13 @@ pub fn move_one_table(table_name: String) {
     // STEP 1: Get data of table from source database
     let source_rows: Vec<Row> = get_rows(source_database_name, &table_name);
 
+    // STEP 2: Check if data has been extracted
+    let target_rows: Vec<Row> = get_rows(target_database_name, &table_name);
+    if target_rows.len() > 0 {
+        println!("Data has been extracted from source database");
+        return;
+    }
+
     // STEP 2: Insert data into target database
     for source_row in source_rows.clone() {
         let columns: &[Column] = source_row.columns();
