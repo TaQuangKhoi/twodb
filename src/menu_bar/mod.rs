@@ -1,6 +1,7 @@
 use std::env::var;
 use std::thread;
 use egui::Align2;
+use log::info;
 use postgres::Row;
 use crate::action::move_data::move_one_table;
 use crate::action::working_database::get_rows;
