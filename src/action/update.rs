@@ -128,6 +128,7 @@ pub fn update_all_tables(database_name: &String) {
 
         let mut table: Table = build_base_simple_table(table_name.clone(), database_name.clone());
         table.update_self_referencing(database_name);
+        table.update_row_count();
 
         // check if table exists
         if table.is_table_exists() {

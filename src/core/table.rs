@@ -58,6 +58,7 @@ impl Table {
         ).unwrap();
     }
 
+    /// Update the table in SQLite
     pub fn update_table_to_db(&mut self) {
         let query = "
             UPDATE tables
