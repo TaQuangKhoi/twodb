@@ -1,6 +1,7 @@
 use egui::Align2;
 use egui_toast::{Toasts};
 use std::sync::{Arc, Mutex};
+use crate::action::move_data::move_one_table;
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
@@ -11,7 +12,10 @@ pub struct TwoDBApp {
 
     #[serde(skip)] // This how you opt-out of serialization of a field
     value: f32,
+
     pub(crate) window_open: bool,
+    pub table_name: String,
+
     pub is_busy_old: bool, // This field is for Spinner
 
     pub is_busy: Arc<Mutex<bool>>, // for synchronize thread
@@ -24,9 +28,10 @@ impl Default for TwoDBApp {
     fn default() -> Self {
         Self {
             // Example stuff:
-            label: "Hello World! 2".to_owned(),
+            label: "Hello World!".to_owned(),
             value: 2.6,
             window_open: false,
+            table_name: "".to_owned(),
             is_busy_old: false,
             is_busy: Arc::new(Mutex::new(false)),
             toast_text: Arc::new(Mutex::new("".to_owned())),
@@ -83,14 +88,14 @@ impl eframe::App for TwoDBApp {
                 .anchor(Align2::CENTER_CENTER, (0.0, 0.0))
                 .show(ctx, |ui| {
                     ui.label("contents");
-                    egui::ComboBox::from_label("Select one!")
-                        .selected_text(format!("{:?}", self.selected))
-                        .show_ui(ui, |ui| {
-                            ui.selectable_value(&mut self.selected, Enum::First, "First 1");
-                            ui.selectable_value(&mut self.selected, Enum::Second, "Second 2");
-                            ui.selectable_value(&mut self.selected, Enum::Third, "Third 3");
-                        },
-                        );
+                    ui.horizontal(|ui| {
+                        ui.label("Enter table name: ");
+                        ui.text_edit_singleline(&mut self.table_name);
+                    });
+                    if ui.button("Move!").clicked() {
+                        println!("Table name: {}", self.table_name);
+                        move_one_table(self.table_name.clone());
+                    }
                 });
         }
 
