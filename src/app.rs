@@ -82,22 +82,7 @@ impl eframe::App for TwoDBApp {
             .anchor(Align2::RIGHT_BOTTOM, (-10.0, -10.0)) // 10 units from the bottom right corner
             .direction(egui::Direction::BottomUp);
 
-        if self.window_open {
-            egui::Window::new("Choose a table")
-                .open(&mut self.window_open)
-                .anchor(Align2::CENTER_CENTER, (0.0, 0.0))
-                .show(ctx, |ui| {
-                    ui.label("contents");
-                    ui.horizontal(|ui| {
-                        ui.label("Enter table name: ");
-                        ui.text_edit_singleline(&mut self.table_name);
-                    });
-                    if ui.button("Move!").clicked() {
-                        println!("Table name: {}", self.table_name);
-                        move_one_table(self.table_name.clone());
-                    }
-                });
-        }
+
 
         // Put your widgets into a `SidePanel`, `TopBottomPanel`, `CentralPanel`, `Window` or `Area`.
         // For inspiration and more examples, go to https://emilk.github.io/egui
