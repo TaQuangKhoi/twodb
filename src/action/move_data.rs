@@ -1,4 +1,5 @@
 use std::env::var;
+use log::info;
 use postgres::{Column, Row};
 use crate::action::working_database::{get_cell_value_by_column_name, get_rows};
 use crate::core::table::Table;
@@ -17,16 +18,20 @@ pub fn move_one_table(table_name: String) {
         default_table.name = table_name;
         default_table.is_exported = true;
         default_table.update_is_exported();
-        println!("Data has been extracted from source database");
+        info!("Data has been extracted from source database");
         return;
     }
 
+    let mut queries: Vec<String> = Vec::new();
     // STEP 2: Insert data into target database
     for source_row in source_rows.clone() {
         let columns: &[Column] = source_row.columns();
-        let query:String = build_insert_query(&table_name, columns, &source_row);
-        println!("Query: {:?}", query);
+        let query: String = build_insert_query(&table_name, columns, &source_row);
+        queries.push(query);
     }
+
+    // len
+    info!("Queries len: {:?}", queries.len());
 }
 
 fn build_insert_query(table_name: &String, columns: &[Column], row: &Row) -> String {

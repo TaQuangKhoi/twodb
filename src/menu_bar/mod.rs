@@ -27,6 +27,7 @@ impl TwoDBApp {
                     let tables_from_sqlite = get_tables_with_condition(&source_database_name,
                     " WHERE database = 'mes' and is_exported = 0 and row_count > 0"
                     );
+                    info!("Tables from sqlite: {:?}", tables_from_sqlite);
                     for table in tables_from_sqlite {
                         move_one_table(table.name);
                     }
@@ -52,7 +53,7 @@ impl TwoDBApp {
                         ui.text_edit_singleline(&mut self.table_name);
                     });
                     if ui.button("Move!").clicked() {
-                        println!("Table name: {}", self.table_name);
+                        info!("Table name: {}", self.table_name);
                         move_one_table(self.table_name.clone());
                     }
                 });
