@@ -1,6 +1,6 @@
 use std::any::Any;
 use std::env::var;
-use egui::ahash::HashMap;
+use std::collections::HashMap;
 use crate::action::working_database::{get_cells, get_rows};
 
 pub fn move_one_table(table_name: String) {
@@ -10,10 +10,23 @@ pub fn move_one_table(table_name: String) {
     // STEP 1: Get data of table from source database
     let mut data: Vec<HashMap<String, Box<dyn Any>>> = Vec::new();
     let source_rows = get_rows(source_database_name, table_name.clone());
-
-    let temp_row = source_rows[0].clone();
-    let temp_cells = get_cells(&temp_row);
-    println!("Source: {:?}", temp_cells);
+    for source_row in &source_rows {
+        let columns = source_row.columns();
+        let cells = get_cells(&source_row);
+        let mut row: HashMap<String, Box<dyn Any>> = HashMap::new();
+        for (i, cell) in cells.iter().enumerate() {
+            let column_name = columns[i].name();
+            println!("Column name: {}", column_name);
+            row.insert(column_name.parse().unwrap(), Box::new(cell.clone()));
+        }
+        data.push(row);
+    }
 
     // STEP 2: Insert data into target database
+    for row in data {
+        for (column_name, cell) in row {
+            let value = cell.downcast_ref::<String>().unwrap();
+            println!("{}", value);
+        }
+    }
 }
