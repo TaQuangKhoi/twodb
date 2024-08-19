@@ -4,7 +4,7 @@ use egui::Align2;
 use postgres::Row;
 use crate::action::move_data::move_one_table;
 use crate::action::working_database::get_rows;
-use crate::core::get_knowledge::{get_tables, get_tables_of_database};
+use crate::core::get_knowledge::{get_tables, get_tables_of_database, get_tables_with_condition};
 /// Render the menu bar
 
 use crate::TwoDBApp;
@@ -24,9 +24,11 @@ impl TwoDBApp {
                 thread::spawn(move || {
                     let source_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
 
-                    let tables_from_sqlite = get_tables_of_database(&source_database_name);
+                    let tables_from_sqlite = get_tables_with_condition(&source_database_name,
+                    " WHERE database = 'mes' and is_exported = 0 and row_count > 0"
+                    );
                     for table in tables_from_sqlite {
-                        println!("Found table {:?}", table.name);
+                        move_one_table(table.name);
                     }
 
                     let text = format!("Done Move Tables for {}", source_database_name);
