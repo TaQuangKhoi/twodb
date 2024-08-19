@@ -17,31 +17,8 @@ fn compare_database() {
 
     for table in tables_to_compare {
         let table_name = table.name.clone();
-        let query = "SELECT * FROM ".to_string() + table_name.as_str();
-        let source_rows = match source_client.query(&query, &[]) {
-            Ok(rows) => rows,
-            Err(err) => {
-                if let Some(db_err) = err.as_db_error() {
-                    if db_err.code() == &SqlState::from_code("42P01") {
-                        println!("Table: {} does not exist in the source database", table_name);
-                        continue;
-                    }
-                }
-                panic!("Error querying source database: {:?}", err);
-            }
-        };
-        let target_rows = match target_client.query(&query, &[]) {
-            Ok(rows) => rows,
-            Err(err) => {
-                if let Some(db_err) = err.as_db_error() {
-                    if db_err.code() == &SqlState::from_code("42P01") {
-                        println!("Table: {} does not exist in the target database", table_name);
-                        continue;
-                    }
-                }
-                panic!("Error querying target database: {:?}", err);
-            }
-        };
+        let source_rows = get_rows(source_database_name.clone(), table_name.clone());
+        let target_rows = get_rows(source_database_name.clone(), table_name.clone());
 
         let source_rows_count = source_rows.len();
         let target_rows_count = target_rows.len();
