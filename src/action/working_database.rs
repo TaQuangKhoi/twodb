@@ -20,8 +20,8 @@ fn compare_database() {
 
     for table in tables_to_compare {
         let table_name = table.name.clone();
-        let source_rows = get_rows(source_database_name.clone(), table_name.clone());
-        let target_rows = get_rows(source_database_name.clone(), table_name.clone());
+        let source_rows = get_rows(source_database_name.clone(), &table_name);
+        let target_rows = get_rows(source_database_name.clone(), &table_name);
 
         let source_rows_count = source_rows.len();
         let target_rows_count = target_rows.len();
@@ -44,7 +44,7 @@ fn compare_database() {
     }
 }
 
-pub fn get_rows(database_name: String, table_name: String) -> Vec<postgres::Row>
+pub fn get_rows(database_name: String, table_name: &String) -> Vec<postgres::Row>
 {
     let mut source_client = connect(database_name.clone()).unwrap();
     let query = "SELECT * FROM ".to_string() + table_name.as_str();
@@ -105,11 +105,10 @@ pub fn get_cells(row: &postgres::Row) -> Vec<String> {
     cells
 }
 
-pub fn get_cell_value_by_column_name(row: Row, column_name: String) -> String {
+pub fn get_cell_value_by_column_name(row: &Row, column_name: String) -> String {
     let columns: &[Column] = row.columns();
     let column = columns.iter().find(|column| column.name() == column_name.clone()).unwrap();
     let type_ = column.type_();
-
     match type_.name() {
         "int8" => {
             let value: Option<i64> = row.try_get(column.name()).unwrap_or(None);
