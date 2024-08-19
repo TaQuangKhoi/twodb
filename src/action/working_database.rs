@@ -20,8 +20,8 @@ fn compare_database() {
 
     for table in tables_to_compare {
         let table_name = table.name.clone();
-        let source_rows = get_rows(source_database_name.clone(), &table_name);
-        let target_rows = get_rows(source_database_name.clone(), &table_name);
+        let source_rows = get_rows(&source_database_name, &table_name);
+        let target_rows = get_rows(&source_database_name, &table_name);
 
         let source_rows_count = source_rows.len();
         let target_rows_count = target_rows.len();
@@ -44,7 +44,7 @@ fn compare_database() {
     }
 }
 
-pub fn get_rows(database_name: String, table_name: &String) -> Vec<postgres::Row>
+pub fn get_rows(database_name: &String, table_name: &String) -> Vec<postgres::Row>
 {
     let mut source_client = connect(database_name.clone()).unwrap();
     let query = "SELECT * FROM ".to_string() + table_name.as_str();

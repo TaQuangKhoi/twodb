@@ -38,6 +38,8 @@ impl Table {
     pub fn increase_export_order(&mut self) {
         self.export_order += 1;
     }
+
+    /// Get postgres row count, then update the struct and SQLite
     pub fn update_row_count(&mut self) {
         let query = "SELECT COUNT(*) FROM ".to_owned() + &self.name;
         let mut pg_conn = connect(self.database.clone()).unwrap();
@@ -71,7 +73,7 @@ impl Table {
             is_self_referencing = ?3,
             self_referencing_column = ?4
 
-            WHERE name = ?5
+            WHERE name = ?5 AND database = ?6
         ";
         let sqlite_conn = Connection::open(SQLITE_DATABASE_PATH).unwrap();
         sqlite_conn.execute(
@@ -82,7 +84,9 @@ impl Table {
                 self.is_self_referencing,
                 self.self_referencing_column.clone(),
 
-                self.name.clone(), // WHERE
+                // WHERE
+                self.name.clone(),
+                self.database.clone(),
             ],
         ).unwrap();
     }
@@ -104,6 +108,22 @@ impl Table {
             self.self_referencing_column = row.get(2);
         }
         result
+    }
+
+    pub fn update_is_exported(&mut self) {
+        let sqlite_conn = Connection::open(SQLITE_DATABASE_PATH).unwrap();
+        sqlite_conn.execute(
+            "
+            UPDATE tables
+            SET is_exported = ?1
+            WHERE name = ?2
+            ",
+            params![
+                self.is_exported,
+
+                self.name.clone(),
+            ],
+        ).unwrap();
     }
 
     /// Check in SQLite if the table exists
