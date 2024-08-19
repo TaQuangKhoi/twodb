@@ -1,6 +1,9 @@
+use std::any::Any;
+use std::collections::HashMap;
 use std::env::var;
 use std::time::SystemTime;
 use postgres::error::SqlState;
+use postgres::{Column, Row};
 use crate::core::get_knowledge::get_tables;
 use crate::database::connect;
 
@@ -100,6 +103,45 @@ pub fn get_cells(row: &postgres::Row) -> Vec<String> {
         }
     }).collect();
     cells
+}
+
+pub fn get_cell_value_by_column_name(row: Row, column_name: String) -> String {
+    let columns: &[Column] = row.columns();
+    let cn = column_name.clone();
+    let column = columns.iter().find(|column| column.name() == cn).unwrap();
+    let type_ = column.type_();
+
+    match type_.name() {
+        "int8" => {
+            let value: Option<i64> = row.try_get(column.name()).unwrap_or(None);
+            value.unwrap_or(0).to_string()
+        }
+        "int4" => {
+            let inner_row = row.clone();
+            let value: Option<i32> = row.try_get(column.name()).unwrap_or(None);
+            value.unwrap_or(0).to_string()
+        }
+        "varchar" => {
+            let inner_row = row.clone();
+            let value: Option<&str> = row.try_get(column.name()).unwrap_or(None);
+            value.unwrap_or("None").to_string()
+        }
+        "bool" => {
+            let inner_row = row.clone();
+            let value: Option<bool> = row.try_get(column.name()).unwrap_or(None);
+            value.unwrap_or(false).to_string()
+        }
+        "timestamp" => {
+            let inner_row = row.clone();
+            let value: Option<SystemTime> = row.try_get(column.name()).unwrap_or(None);
+            value.unwrap_or(SystemTime::UNIX_EPOCH)
+                .duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs().to_string()
+        }
+        _ => {
+            println!("Unknown type: {:?}", type_.name());
+            "Unknown".to_string()
+        }
+    }
 }
 
 fn run_database(database_name: String) {
