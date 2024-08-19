@@ -6,20 +6,20 @@ use crate::TwoDBApp;
 
 impl TwoDBApp {
     pub fn menu_btn_migrate_data_render(&mut self, ctx: &egui::Context, ui: &mut egui::Ui) {
+        let temp = "Migrate Data Temp";
+
         ui.menu_button("Migrate Data", |ui|{
             if ui.button("Move One Table").clicked() {
-                self.window_open = true;
+                self.windows_state.window_move_one_table_open = true;
             }
-
-
         });
 
-        if self.window_open {
+        if self.windows_state.window_move_one_table_open {
             egui::Window::new("Choose a table")
-                .open(&mut self.window_open)
+                .open(&mut self.windows_state.window_move_one_table_open)
                 .anchor(Align2::CENTER_CENTER, (0.0, 0.0))
                 .show(ctx, |ui| {
-                    ui.label("contents");
+                    ui.label(temp);
                     ui.horizontal(|ui| {
                         ui.label("Enter table name: ");
                         ui.text_edit_singleline(&mut self.table_name);

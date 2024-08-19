@@ -2,6 +2,7 @@ use egui::Align2;
 use egui_toast::{Toasts};
 use std::sync::{Arc, Mutex};
 use crate::action::move_data::move_one_table;
+use crate::state::WindowsState;
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
@@ -13,7 +14,8 @@ pub struct TwoDBApp {
     #[serde(skip)] // This how you opt-out of serialization of a field
     value: f32,
 
-    pub(crate) window_open: bool,
+    pub windows_state: WindowsState,
+
     pub table_name: String,
 
     pub is_busy_old: bool, // This field is for Spinner
@@ -30,7 +32,9 @@ impl Default for TwoDBApp {
             // Example stuff:
             label: "Hello World!".to_owned(),
             value: 2.6,
-            window_open: false,
+            windows_state: WindowsState {
+                window_move_one_table_open: false,
+            },
             table_name: "".to_owned(),
             is_busy_old: false,
             is_busy: Arc::new(Mutex::new(false)),
@@ -56,7 +60,7 @@ impl TwoDBApp {
                 let is_busy = app.is_busy.clone();
                 *is_busy.lock().unwrap() = false;
 
-                app.window_open = false;
+                app.windows_state.window_move_one_table_open = false;
 
                 app.toast_text.lock().unwrap().clear();
             }
@@ -81,8 +85,6 @@ impl eframe::App for TwoDBApp {
         let mut toasts = Toasts::new()
             .anchor(Align2::RIGHT_BOTTOM, (-10.0, -10.0)) // 10 units from the bottom right corner
             .direction(egui::Direction::BottomUp);
-
-
 
         // Put your widgets into a `SidePanel`, `TopBottomPanel`, `CentralPanel`, `Window` or `Area`.
         // For inspiration and more examples, go to https://emilk.github.io/egui
