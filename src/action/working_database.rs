@@ -107,8 +107,7 @@ pub fn get_cells(row: &postgres::Row) -> Vec<String> {
 
 pub fn get_cell_value_by_column_name(row: Row, column_name: String) -> String {
     let columns: &[Column] = row.columns();
-    let cn = column_name.clone();
-    let column = columns.iter().find(|column| column.name() == cn).unwrap();
+    let column = columns.iter().find(|column| column.name() == column_name.clone()).unwrap();
     let type_ = column.type_();
 
     match type_.name() {
