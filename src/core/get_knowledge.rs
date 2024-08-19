@@ -30,6 +30,7 @@ pub fn get_tables() -> Vec<Table> {
             is_self_referencing: false,
             self_referencing_column: String::from(""),
             row_count: row.get(8)?,
+            is_exported: false,
         })
     }).unwrap();
     let mut result = Vec::new();

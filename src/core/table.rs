@@ -16,6 +16,7 @@ pub struct Table {
     pub is_self_referencing: bool,
     pub self_referencing_column: String,
     pub row_count: i64, // postgres type: int8
+    pub is_exported: bool,
 }
 impl Default for Table {
     fn default() -> Self {
@@ -29,6 +30,7 @@ impl Default for Table {
             is_self_referencing: false,
             self_referencing_column: String::from(""),
             row_count: 0,
+            is_exported: false,
         }
     }
 }
@@ -136,7 +138,8 @@ pub fn create_tables_table(conn: &Connection) {
             export_order INTEGER NOT NULL,
             is_self_referencing BOOLEAN NOT NULL,
             self_referencing_column TEXT,
-            row_count INTEGER NOT NULL
+            row_count INTEGER NOT NULL DEFAULT 0,
+            is_exported BOOLEAN NOT NULL DEFAULT FALSE
         )",
         params![],
     ).unwrap();
@@ -152,6 +155,7 @@ pub fn build_base_simple_table(name: String, database: String) -> Table {
         is_self_referencing: false,
         self_referencing_column: String::from(""),
         row_count: 0,
+        is_exported: false,
     };
     new_table
 }
@@ -166,6 +170,7 @@ pub fn build_self_references_table(name: String, database: String) -> Table {
         is_self_referencing: true,
         self_referencing_column: String::from(""),
         row_count: 0,
+        is_exported: false,
     };
     new_table
 }
