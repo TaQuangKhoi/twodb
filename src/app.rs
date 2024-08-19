@@ -34,6 +34,8 @@ impl Default for TwoDBApp {
             value: 2.6,
             windows_state: WindowsState {
                 window_move_one_table_open: false,
+                window_move_all_tables_open: false,
+
             },
             table_name: "".to_owned(),
             is_busy_old: false,
@@ -61,6 +63,7 @@ impl TwoDBApp {
                 *is_busy.lock().unwrap() = false;
 
                 app.windows_state.window_move_one_table_open = false;
+                app.windows_state.window_move_all_tables_open = false;
 
                 app.toast_text.lock().unwrap().clear();
             }
