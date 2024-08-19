@@ -46,21 +46,21 @@ fn compare_database() {
 
 pub fn get_rows(database_name: &String, table_name: &String) -> Vec<postgres::Row>
 {
-    let mut source_client = connect(database_name.clone()).unwrap();
+    let mut pg_client = connect(database_name.clone()).unwrap();
     let query = "SELECT * FROM ".to_string() + table_name.as_str();
-    let source_rows = match source_client.query(&query, &[]) {
+    let rows = match pg_client.query(&query, &[]) {
         Ok(rows) => rows,
         Err(err) => {
             if let Some(db_err) = err.as_db_error() {
                 if db_err.code() == &SqlState::from_code("42P01") {
-                    println!("Table: {} does not exist in the source database", table_name);
+                    println!("Table: {} does not exist in the database {}", table_name, database_name);
                     return Vec::new();
                 }
             }
-            panic!("Error querying source database: {:?}", err);
+            panic!("Error querying database {}: {:?}", database_name, err);
         }
     };
-    source_rows
+    rows
 }
 
 fn _row_to_string(row: &postgres::Row) -> String {
