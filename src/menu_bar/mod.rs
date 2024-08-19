@@ -25,13 +25,11 @@ impl TwoDBApp {
                     let source_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
 
                     let tables_from_sqlite = get_tables_of_database(&source_database_name);
-                    // for row in source_rows {
-                    //     let columns: &[Column] = row.columns();
-                    //     let table_name = columns[0].name();
-                    //     move_one_table(table_name);
-                    // }
+                    for table in tables_from_sqlite {
+                        println!("Found table {:?}", table.name);
+                    }
 
-                    let text = format!("Done Get Tables for {}", source_database_name);
+                    let text = format!("Done Move Tables for {}", source_database_name);
                     TwoDBApp::notify(text, is_busy, toast_text);
                 });
             }

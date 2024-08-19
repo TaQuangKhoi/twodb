@@ -1,4 +1,4 @@
-use rusqlite::{Connection, params};
+use rusqlite::{Connection, MappedRows, params, Row};
 use crate::core::table::{ExportComplexityType, Table, TableType};
 
 const SQLITE_DATABASE_PATH: &str = "twodb.db";
@@ -37,13 +37,14 @@ pub fn get_tables() -> Vec<Table> {
     let mut result = Vec::new();
     for table in tables {
         let mut inner_table = table.unwrap();
-        inner_table.update_row_count();
+        inner_table.update_row_count(); // Long running query
         result.push(inner_table);
     }
     result
 }
 
-pub fn get_tables_of_database(database_name: &String) -> MappedRows<fn(&Row) -> rusqlite::Result<Table>> {
+pub fn get_tables_of_database(database_name: &String) -> Vec<Table>
+{
     let sqlite_conn = Connection::open(SQLITE_DATABASE_PATH).unwrap();
     let mut stmt = sqlite_conn.prepare(
         "SELECT
@@ -76,5 +77,9 @@ pub fn get_tables_of_database(database_name: &String) -> MappedRows<fn(&Row) -> 
             is_exported: false,
         })
     }).unwrap();
-    tables_iter
+    let mut result = Vec::new();
+    for table in tables_iter {
+        result.push(table.unwrap());
+    }
+    result
 }
