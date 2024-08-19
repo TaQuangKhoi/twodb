@@ -135,8 +135,18 @@ pub fn get_cell_value_by_column_name(row: &Row, column_name: String) -> String {
             value.unwrap_or(SystemTime::UNIX_EPOCH)
                 .duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs().to_string()
         }
+        "numeric" => {
+            let inner_row = row.clone();
+            let value: Option<f64> = row.try_get(column.name()).unwrap_or(None);
+            value.unwrap_or(0.0).to_string()
+        }
+        "text" => {
+            let inner_row = row.clone();
+            let value: Option<&str> = row.try_get(column.name()).unwrap_or(None);
+            value.unwrap_or("None").to_string()
+        }
         _ => {
-            println!("Unknown type: {:?}", type_.name());
+            println!("get_cell_value_by_column_name - Unknown type: {:?}", type_.name());
             "Unknown".to_string()
         }
     }
