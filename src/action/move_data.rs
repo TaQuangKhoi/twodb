@@ -22,10 +22,7 @@ pub fn move_one_table(table_name: String) {
     // STEP 2: Check if data has been extracted
     let target_rows: Vec<Row> = get_rows(&target_database_name, &table_name);
     if target_rows.len() > 0 {
-        let mut default_table = Table::default();
-        default_table.name = table_name;
-        default_table.is_exported = true;
-        default_table.update_is_exported();
+        set_table_is_exported(&table_name, true);
         info!("Data has been extracted from source database");
         return;
     }
@@ -49,6 +46,7 @@ pub fn move_one_table(table_name: String) {
     let row = rows.get(0).unwrap();
     let is_table_existed: bool = row.get(0);
     if !is_table_existed {
+        set_table_is_exported(&table_name, true);
         info!("Table: {} does not exist in the target database", table_name);
         return;
     }
