@@ -41,10 +41,10 @@ impl Table {
 
     /// Get postgres row count, then update the struct and SQLite
     pub fn update_row_count(&mut self) {
-        let query = "SELECT COUNT(*) FROM ".to_owned() + &self.name;
+        let pg_query = "SELECT COUNT(*) FROM ".to_owned() + &self.name;
         let mut pg_conn = connect(self.database.clone()).unwrap();
         let rows = pg_conn.query(
-            &query,
+            &pg_query,
             &[],
         ).unwrap();
         let count: i64 = rows[0].get(0);
