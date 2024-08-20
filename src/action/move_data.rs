@@ -5,6 +5,13 @@ use crate::action::working_database::{get_cell_value_by_column_name, get_rows};
 use crate::core::table::Table;
 use crate::database::connect;
 
+fn set_table_is_exported(table_name: &String, is_exported: bool) {
+    let mut default_table = Table::default();
+    default_table.name = table_name.clone();
+    default_table.is_exported = true;
+    default_table.update_is_exported();
+}
+
 pub fn move_one_table(table_name: String) {
     let source_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
     let target_database_name = var("POSTGRES_DB_TARGET").unwrap_or(String::from(""));
