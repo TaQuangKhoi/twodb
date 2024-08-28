@@ -35,7 +35,7 @@ impl Default for TwoDBApp {
             windows_state: WindowsState {
                 window_move_one_table_open: false,
                 window_move_all_tables_open: false,
-
+                window_reset_open: false,
             },
             table_name: "".to_owned(),
             is_busy_old: false,
@@ -111,6 +111,7 @@ impl eframe::App for TwoDBApp {
                         self.render_get_empty_tables_button(ui);
                     });
                     self.menu_btn_migrate_data_render(ctx, ui);
+                    self.menu_btn_reset_render(ctx, ui);
                     ui.menu_button("Settings", |ui| {});
 
                     if self.is_busy.lock().unwrap().clone() {

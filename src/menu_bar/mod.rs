@@ -1,3 +1,5 @@
+mod menu_btn_reset;
+
 use std::env::var;
 use std::thread;
 use egui::Align2;
