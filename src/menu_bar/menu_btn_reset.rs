@@ -1,6 +1,7 @@
 use egui::Align2;
 use log::info;
 use crate::TwoDBApp;
+use crate::core::reset_knowledge::reset_database;
 
 impl TwoDBApp {
     pub fn menu_btn_reset_render(&mut self, ctx: &egui::Context, ui: &mut egui::Ui) {
@@ -12,7 +13,6 @@ impl TwoDBApp {
 
         /// Window Reset
         if self.windows_state.window_reset_open {
-            // let mut self_clone : *mut TwoDBApp = self;
             egui::Window::new("Reset")
                 .open(&mut self.windows_state.window_reset_open)
 
@@ -25,7 +25,7 @@ impl TwoDBApp {
                         if ui.button("Yes").clicked() {
                             // Delete Database in SQLite
                             info!("Resetting database");
-                            // (*self_clone).windows_state.window_reset_open = false;
+                            reset_database();
                         }
                         if ui.button("No").clicked() {
                             info!("Cancel Resetting database");

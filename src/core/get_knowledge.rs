@@ -1,8 +1,8 @@
 use egui::TextBuffer;
 use rusqlite::{Connection, MappedRows, params, Row};
+use crate::core::SQLITE_DATABASE_PATH;
 use crate::core::table::{ExportComplexityType, Table, TableType};
 
-const SQLITE_DATABASE_PATH: &str = "twodb.db";
 const SELECT_PART: &str = "SELECT
             id,
             name,
