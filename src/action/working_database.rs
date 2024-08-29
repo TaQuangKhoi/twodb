@@ -6,8 +6,6 @@ use postgres::{Column, Row};
 use crate::core::get_knowledge::get_tables;
 use crate::database::connect;
 
-const SQLITE_DATABASE_PATH: &str = "twodb.db";
-
 /// Compare two databases (PostgreSQL)
 fn compare_database() {
     let source_pg_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
@@ -114,33 +112,27 @@ pub fn get_cell_value_by_column_name(row: &Row, column_name: String) -> String {
             value.unwrap_or(0).to_string()
         }
         "int4" => {
-            let inner_row = row.clone();
             let value: Option<i32> = row.try_get(column.name()).unwrap_or(None);
             value.unwrap_or(0).to_string()
         }
         "varchar" => {
-            let inner_row = row.clone();
             let value: Option<&str> = row.try_get(column.name()).unwrap_or(None);
             value.unwrap_or("None").to_string()
         }
         "bool" => {
-            let inner_row = row.clone();
             let value: Option<bool> = row.try_get(column.name()).unwrap_or(None);
             value.unwrap_or(false).to_string()
         }
         "timestamp" => {
-            let inner_row = row.clone();
             let value: Option<SystemTime> = row.try_get(column.name()).unwrap_or(None);
             value.unwrap_or(SystemTime::UNIX_EPOCH)
                 .duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs().to_string()
         }
         "numeric" => {
-            let inner_row = row.clone();
             let value: Option<f64> = row.try_get(column.name()).unwrap_or(None);
             value.unwrap_or(0.0).to_string()
         }
         "text" => {
-            let inner_row = row.clone();
             let value: Option<&str> = row.try_get(column.name()).unwrap_or(None);
             value.unwrap_or("None").to_string()
         }
