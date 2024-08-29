@@ -34,6 +34,20 @@ fn check_if_table_existed_in_db(database_name: &String, table_name: &String) -> 
     row.get(0)
 }
 
+fn prepare_queries(table_name: &String, rows: &Vec<Row>) -> Vec<String>{
+    let mut queries: Vec<String> = Vec::new();
+    // STEP 2: Insert data into target database
+    for source_row in rows {
+        // TODO: Build columns that have in source db only
+        let columns: &[Column] = source_row.columns();
+
+        let query: String = build_insert_query(&table_name, columns, &source_row);
+        queries.push(query);
+    }
+
+    queries
+}
+
 pub fn move_one_table(table_name: String) {
     let source_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
     let target_database_name = var("POSTGRES_DB_TARGET").unwrap_or(String::from(""));
@@ -65,22 +79,15 @@ pub fn move_one_table(table_name: String) {
         return;
     }
 
-    let mut queries: Vec<String> = Vec::new();
+    let queries: Vec<String> = prepare_queries(&table_name, &source_rows);
     // STEP 2: Insert data into target database
-    for source_row in source_rows.clone() {
-
-        // TODO: Build columns that have in source db only
-        let columns: &[Column] = source_row.columns();
-
-        let query: String = build_insert_query(&table_name, columns, &source_row);
-        queries.push(query);
-    }
 
     // len
     info!("Queries len: {:?}", queries.len());
     let mut failed_queries: Vec<String> = Vec::new();
     
     let mut pg_client = pg_connect(&target_database_name).unwrap();
+
     for query in queries {
         info!("Query: {:?}", query);
         match pg_client.query(&query, &[]) {
