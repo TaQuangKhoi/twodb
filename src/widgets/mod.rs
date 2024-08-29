@@ -1,4 +1,4 @@
 mod btn_update_self_referencing_tables;
-mod update_tables_button;
+mod btn_update_tables;
 mod btn_update_clean_tables;
 mod btn_update_empty_tables;
