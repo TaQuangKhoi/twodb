@@ -60,12 +60,12 @@ pub fn get_rows(database_name: &String, table_name: &String) -> Vec<postgres::Ro
     rows
 }
 
-fn _row_to_string(row: &postgres::Row) -> String {
+fn _row_to_string(row: &Row) -> String {
     format!("{:?}", get_cells(row))
 }
 
 /// Get cells from a row based on the column type
-pub fn get_cells(row: &postgres::Row) -> Vec<String> {
+pub fn get_cells(row: &Row) -> Vec<String> {
     let columns = row.columns();
     let cells: Vec<String> = columns.iter().map(|column| {
         let name = column.name();
