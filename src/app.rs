@@ -1,7 +1,6 @@
 use egui::Align2;
 use egui_toast::{Toasts};
 use std::sync::{Arc, Mutex};
-use crate::action::move_data::move_one_table;
 use crate::state::WindowsState;
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
@@ -58,7 +57,7 @@ impl TwoDBApp {
             let mut app: TwoDBApp = eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default();
 
             {
-                /// Reset is_busy to false
+                // Reset is_busy to false
                 let is_busy = app.is_busy.clone();
                 *is_busy.lock().unwrap() = false;
 
@@ -112,7 +111,7 @@ impl eframe::App for TwoDBApp {
                     });
                     self.menu_btn_migrate_data_render(ctx, ui);
                     self.menu_btn_reset_render(ctx, ui);
-                    ui.menu_button("Settings", |ui| {});
+                    ui.menu_button("Settings", |_| {});
 
                     if self.is_busy.lock().unwrap().clone() {
                         ui.add(egui::Spinner::new());
@@ -152,7 +151,7 @@ impl eframe::App for TwoDBApp {
             });
         });
 
-        let mut toast_text = self.toast_text.lock().unwrap().clone();
+        let toast_text = self.toast_text.lock().unwrap().clone();
         if !toast_text.is_empty() {
             let text = toast_text.clone();
             toasts.add(egui_toast::Toast {
