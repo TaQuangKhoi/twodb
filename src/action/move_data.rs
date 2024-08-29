@@ -8,7 +8,7 @@ use crate::database::connect;
 fn set_table_is_exported(table_name: &String, is_exported: bool) {
     let mut default_table = Table::default();
     default_table.name = table_name.clone();
-    default_table.is_exported = true;
+    default_table.is_exported = is_exported;
     default_table.update_is_exported();
 }
 
