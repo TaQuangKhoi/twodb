@@ -116,7 +116,7 @@ pub fn get_cell_value_by_column_name(row: &Row, column_name: String) -> String {
         "int8" => {
             let value: Option<i64> = row.try_get(column.name()).unwrap_or(None);
             if value.is_none() {
-                return TWODB_NULL;
+                return TWODB_NULL.to_string();
             }
             value.unwrap_or(0).to_string()
         }
@@ -134,13 +134,16 @@ pub fn get_cell_value_by_column_name(row: &Row, column_name: String) -> String {
         }
         "timestamp" => {
             let value: Option<SystemTime> = row.try_get(column.name()).unwrap_or(None);
+            if value.is_none() {
+                return TWODB_NULL.to_string();
+            }
             value.unwrap_or(SystemTime::UNIX_EPOCH)
                 .duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs().to_string()
         }
         "numeric" => {
             let value: Option<f64> = row.try_get(column.name()).unwrap_or(None);
             if value.is_none() {
-                return TWODB_NULL;
+                return TWODB_NULL.to_string();
             }
             value.unwrap_or(0.0).to_string()
         }
