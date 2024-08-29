@@ -16,11 +16,21 @@ pub fn move_one_table(table_name: String) {
     let source_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
     let target_database_name = var("POSTGRES_DB_TARGET").unwrap_or(String::from(""));
 
-    // STEP 1: Get data of table from source database
+    // STEP 1: Get data of table from source database and target database
     let source_rows: Vec<Row> = get_rows(&source_database_name, &table_name);
+    let target_rows: Vec<Row> = get_rows(&target_database_name, &table_name);
+
 
     // STEP 2: Check if data has been extracted
-    let target_rows: Vec<Row> = get_rows(&target_database_name, &table_name);
+
+    // Case : Both source and target databases are empty
+    if source_rows.len() == 0 && target_rows.len() == 0 {
+        set_table_is_exported(&table_name, true);
+        info!("Both source and target databases are empty");
+        return;
+    }
+
+    // Case 1: Data has been extracted
     if target_rows.len() > 0 {
         set_table_is_exported(&table_name, true);
         info!("Data has been extracted from source database");
@@ -72,7 +82,7 @@ pub fn move_one_table(table_name: String) {
             }
             Err(err) => {
                 failed_queries.push(query);
-                error!("Error querying : {:?}", err);
+                error!("Error when insert : {:?}", err);
             }
         };
     }

@@ -10,8 +10,8 @@ use crate::database::connect;
 fn compare_database() {
     let source_pg_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
     let target_pg_database_name = var("POSTGRES_DB_TARGET").unwrap_or(String::from(""));
-    let mut source_pg_client = connect(source_pg_database_name.clone()).unwrap();
-    let mut target_pg_client = connect(target_pg_database_name.clone()).unwrap();
+    let _source_pg_client = connect(source_pg_database_name.clone()).unwrap();
+    let _target_pg_client = connect(target_pg_database_name.clone()).unwrap();
 
     let tables_to_compare = get_tables();
 
