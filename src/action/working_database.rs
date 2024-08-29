@@ -6,14 +6,14 @@ use postgres::error::SqlState;
 use postgres::{Column, Row};
 use crate::action::TWODB_NULL;
 use crate::core::get_knowledge::get_tables;
-use crate::database::connect;
+use crate::database::pg_connect;
 
 /// Compare two databases (PostgreSQL)
 fn compare_database() {
     let source_pg_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
     let target_pg_database_name = var("POSTGRES_DB_TARGET").unwrap_or(String::from(""));
-    let _source_pg_client = connect(source_pg_database_name.clone()).unwrap();
-    let _target_pg_client = connect(target_pg_database_name.clone()).unwrap();
+    let _source_pg_client = pg_connect(&source_pg_database_name).unwrap();
+    let _target_pg_client = pg_connect(&target_pg_database_name).unwrap();
 
     let tables_to_compare = get_tables();
 
@@ -43,9 +43,9 @@ fn compare_database() {
     }
 }
 
-pub fn get_rows(database_name: &String, table_name: &String) -> Vec<postgres::Row>
+pub fn get_rows(database_name: &String, table_name: &String) -> Vec<Row>
 {
-    let mut pg_client = connect(database_name.clone()).unwrap();
+    let mut pg_client = pg_connect(database_name).unwrap();
     let query = "SELECT * FROM ".to_string() + table_name.as_str();
     let rows = match pg_client.query(&query, &[]) {
         Ok(rows) => rows,
@@ -163,7 +163,7 @@ pub fn get_cell_value_by_column_name(row: &Row, column_name: String) -> String {
 }
 
 fn run_database(database_name: String) {
-    let mut client = match connect(database_name) {
+    let mut client = match pg_connect(&database_name) {
         Ok(client) => client,
         Err(err) => {
             error!("Error: {}", err);

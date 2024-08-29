@@ -1,5 +1,5 @@
 use rusqlite::{Connection, params};
-use crate::database::connect;
+use crate::database::pg_connect;
 use crate::postgresql_queries::query_get_self_references_by_table;
 use crate::core::sqlite_queries::query_update_row_count;
 
@@ -42,7 +42,7 @@ impl Table {
     /// Get postgres row count, then update the struct and SQLite
     pub fn update_row_count(&mut self) {
         let pg_query = "SELECT COUNT(*) FROM ".to_owned() + &self.name;
-        let mut pg_conn = connect(self.database.clone()).unwrap();
+        let mut pg_conn = pg_connect(&self.database).unwrap();
         let rows = pg_conn.query(
             &pg_query,
             &[],
@@ -94,7 +94,7 @@ impl Table {
     /// Call to Postgres to check if the table is self-referencing
     /// Save the result to the struct
     pub fn update_self_referencing(&mut self, database_name: &String) -> bool {
-        let mut client = connect(database_name.clone()).unwrap();
+        let mut client = pg_connect(database_name).unwrap();
         // check name of self
         let rows = client.query(
             &query_get_self_references_by_table(),

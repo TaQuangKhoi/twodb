@@ -6,7 +6,7 @@ use postgres::{Client, Error, NoTls};
 /// Return a postgres::client::Client object
 ///
 /// Author : Ta Quang Khoi
-pub fn connect(database_name: String) -> rusqlite::Result<Client, Error> {
+pub fn pg_connect(database_name: &String) -> rusqlite::Result<Client, Error> {
     let username = var("POSTGRES_USER").unwrap_or(String::from(""));
     let password = var("POSTGRES_PASSWORD").unwrap_or(String::from(""));
     let host = var("POSTGRES_HOST").unwrap_or(String::from(""));

@@ -2,13 +2,13 @@
 
 use rusqlite::Connection;
 use crate::core::table::{build_base_simple_table, create_tables_table, insert_new_table, Table};
-use crate::database::connect;
+use crate::database::pg_connect;
 use crate::postgresql_queries::query_get_self_references_tables;
 
 const SQLITE_DATABASE_PATH: &str = "twodb.db";
 
 pub fn update_table_self_references(database_name: &String) {
-    let mut client = connect(database_name.clone()).unwrap();
+    let mut client = pg_connect(&database_name).unwrap();
     let query = query_get_self_references_tables();
 
     let rows = client.query(
@@ -38,7 +38,7 @@ pub fn update_table_self_references(database_name: &String) {
 }
 
 pub fn update_empty_tables(database_name: &String) {
-    let mut pg_client = connect(database_name.clone()).unwrap();
+    let mut pg_client = pg_connect(database_name).unwrap();
     let query =
         "SELECT n.nspname,
             c.relname AS table_name,
@@ -73,7 +73,7 @@ pub fn update_empty_tables(database_name: &String) {
 /// Get all tables that do not have foreign keys
 /// then save them to the tables table
 pub fn update_clean_tables(database_name: &String) {
-    let mut client = connect(database_name.clone()).unwrap();
+    let mut client = pg_connect(database_name).unwrap();
     let query = "SELECT table_name
         FROM information_schema.tables
         WHERE table_schema = 'public'
@@ -107,7 +107,7 @@ pub fn update_clean_tables(database_name: &String) {
 }
 
 pub fn update_all_tables(database_name: &String) {
-    let mut client = connect(database_name.clone()).unwrap();
+    let mut client = pg_connect(database_name).unwrap();
     let query = "
         SELECT table_name, table_type
         FROM information_schema.tables

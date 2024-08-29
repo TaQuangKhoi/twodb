@@ -4,13 +4,34 @@ use postgres::{Column, Row};
 use crate::action::TWODB_NULL;
 use crate::action::working_database::{get_cell_value_by_column_name, get_rows};
 use crate::core::table::Table;
-use crate::database::connect;
+use crate::database::pg_connect;
 
 fn set_table_is_exported(table_name: &String, is_exported: bool) {
     let mut default_table = Table::default();
     default_table.name = table_name.clone();
     default_table.is_exported = is_exported;
     default_table.update_is_exported();
+}
+
+fn check_if_table_existed_in_db(database_name: &String, table_name: &String) -> bool{
+    // Check if the table is existed in the target database
+    let mut pg_client = pg_connect(database_name).unwrap();
+    let query_check_table_existed = format!("
+        SELECT EXISTS (
+          SELECT 1
+          FROM pg_tables
+          WHERE schemaname = 'public'
+            AND tablename = '{}'
+        );", table_name);
+    let rows = match pg_client.query(&query_check_table_existed, &[]) {
+        Ok(rows) => rows,
+        Err(err) => {
+            info!("Error querying : {:?}", err);
+            return false;
+        }
+    };
+    let row = rows.get(0).unwrap();
+    row.get(0)
 }
 
 pub fn move_one_table(table_name: String) {
@@ -38,30 +59,11 @@ pub fn move_one_table(table_name: String) {
         return;
     }
 
-    // Check if the table is existed in the target database
-    let mut pg_client = connect(target_database_name.clone()).unwrap();
-    let query_check_table_existed = format!("
-        SELECT EXISTS (
-          SELECT 1
-          FROM pg_tables
-          WHERE schemaname = 'public'
-            AND tablename = '{}'
-        );", table_name);
-    let rows = match pg_client.query(&query_check_table_existed, &[]) {
-        Ok(rows) => rows,
-        Err(err) => {
-            info!("Error querying : {:?}", err);
-            return;
-        }
-    };
-    let row = rows.get(0).unwrap();
-    let is_table_existed: bool = row.get(0);
-    if !is_table_existed {
+    if !check_if_table_existed_in_db(&target_database_name, &table_name) {
         set_table_is_exported(&table_name, true);
         info!("Table: {} does not exist in the target database", table_name);
         return;
     }
-
 
     let mut queries: Vec<String> = Vec::new();
     // STEP 2: Insert data into target database
@@ -77,8 +79,9 @@ pub fn move_one_table(table_name: String) {
     // len
     info!("Queries len: {:?}", queries.len());
     let mut failed_queries: Vec<String> = Vec::new();
+    
+    let mut pg_client = pg_connect(&target_database_name).unwrap();
     for query in queries {
-        let mut pg_client = connect(target_database_name.clone()).unwrap();
         info!("Query: {:?}", query);
         match pg_client.query(&query, &[]) {
             Ok(_) => {
