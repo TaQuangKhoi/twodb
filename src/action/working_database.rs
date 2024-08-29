@@ -1,5 +1,6 @@
 use std::env::var;
 use std::time::SystemTime;
+use chrono::NaiveDate;
 use log::{error, info};
 use postgres::error::SqlState;
 use postgres::{Column, Row};
@@ -93,6 +94,10 @@ pub fn get_cells(row: &Row) -> Vec<String> {
                 format!("{}: {}", name, value.unwrap_or(SystemTime::UNIX_EPOCH)
                     .duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs())
             }
+            "date" => {
+                let value: Option<NaiveDate> = row.try_get(name).unwrap_or(None);
+                format!("{}: {}", name, value.unwrap_or(NaiveDate::from_ymd_opt(1970, 1, 1).unwrap()))
+            }
             _ => {
                 error!("Unknown type: {:?}", type_.name());
                 format!("{}: {}", name, "Unknown")
@@ -135,6 +140,11 @@ pub fn get_cell_value_by_column_name(row: &Row, column_name: String) -> String {
         "text" => {
             let value: Option<&str> = row.try_get(column.name()).unwrap_or(None);
             value.unwrap_or("None").to_string()
+        }
+        "date" => {
+            let value: Option<SystemTime> = row.try_get(column.name()).unwrap_or(None);
+            value.unwrap_or(SystemTime::UNIX_EPOCH)
+                .duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs().to_string()
         }
         _ => {
             error!("get_cell_value_by_column_name - Unknown type: {:?}", type_.name());
