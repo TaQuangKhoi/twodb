@@ -26,6 +26,7 @@ log = "0.4"
 # You only need serde if you want app persistence:
 serde = { version = "1", features = ["derive"] }
 tokio = { version = "1.39.2", features = ["rt", "rt-multi-thread", "macros"] }
+chrono = "0.4.38"
 
 # native:
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
