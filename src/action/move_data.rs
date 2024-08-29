@@ -1,6 +1,7 @@
 use std::env::var;
 use log::{error, info};
 use postgres::{Column, Row};
+use crate::action::TWODB_NULL;
 use crate::action::working_database::{get_cell_value_by_column_name, get_rows};
 use crate::core::table::Table;
 use crate::database::connect;
@@ -65,7 +66,10 @@ pub fn move_one_table(table_name: String) {
     let mut queries: Vec<String> = Vec::new();
     // STEP 2: Insert data into target database
     for source_row in source_rows.clone() {
+
+        // TODO: Build columns that have in source db only
         let columns: &[Column] = source_row.columns();
+
         let query: String = build_insert_query(&table_name, columns, &source_row);
         queries.push(query);
     }
@@ -79,6 +83,7 @@ pub fn move_one_table(table_name: String) {
         match pg_client.query(&query, &[]) {
             Ok(_) => {
                 info!("Query executed successfully");
+                set_table_is_exported(&table_name, true);
             }
             Err(err) => {
                 failed_queries.push(query);
@@ -96,7 +101,13 @@ fn build_insert_query(table_name: &String, columns: &[Column], row: &Row) -> Str
     let columns_str = columns.iter().map(|c| c.name()).collect::<Vec<_>>().join(", ");
     let values_str = columns.iter().map(
         |c|
-        { format!("'{}'", get_cell_value_by_column_name(row, c.name().to_string())) }
+        {
+            let value = get_cell_value_by_column_name(row, c.name().to_string());
+            if value == TWODB_NULL {
+                return "NULL".to_string();
+            }
+            format!("'{}'", get_cell_value_by_column_name(row, c.name().to_string()))
+        }
     ).collect::<Vec<_>>().join(", ");
     format!("INSERT INTO {} ({}) VALUES ({})", table_name, columns_str, values_str)
 }

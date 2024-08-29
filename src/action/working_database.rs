@@ -1,9 +1,10 @@
 use std::env::var;
 use std::time::SystemTime;
 use chrono::NaiveDate;
-use log::{error, info};
+use log::{debug, error, info};
 use postgres::error::SqlState;
 use postgres::{Column, Row};
+use crate::action::TWODB_NULL;
 use crate::core::get_knowledge::get_tables;
 use crate::database::connect;
 
@@ -80,7 +81,6 @@ pub fn get_cells(row: &Row) -> Vec<String> {
                 let value: Option<i32> = row.try_get(name).unwrap_or(None);
                 format!("{}: {}", name, value.unwrap_or(0))
             }
-
             "varchar" => {
                 let value: Option<&str> = row.try_get(name).unwrap_or(None);
                 format!("{}: {}", name, value.unwrap_or("None"))
@@ -111,9 +111,13 @@ pub fn get_cell_value_by_column_name(row: &Row, column_name: String) -> String {
     let columns: &[Column] = row.columns();
     let column = columns.iter().find(|column| column.name() == column_name.clone()).unwrap();
     let type_ = column.type_();
+
     match type_.name() {
         "int8" => {
             let value: Option<i64> = row.try_get(column.name()).unwrap_or(None);
+            if value.is_none() {
+                return TWODB_NULL;
+            }
             value.unwrap_or(0).to_string()
         }
         "int4" => {
@@ -135,6 +139,9 @@ pub fn get_cell_value_by_column_name(row: &Row, column_name: String) -> String {
         }
         "numeric" => {
             let value: Option<f64> = row.try_get(column.name()).unwrap_or(None);
+            if value.is_none() {
+                return TWODB_NULL;
+            }
             value.unwrap_or(0.0).to_string()
         }
         "text" => {
