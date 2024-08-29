@@ -11,7 +11,7 @@ impl TwoDBApp {
             }
         });
 
-        /// Window Reset
+        // Window Reset
         if self.windows_state.window_reset_open {
             egui::Window::new("Reset")
                 .open(&mut self.windows_state.window_reset_open)
@@ -21,7 +21,7 @@ impl TwoDBApp {
 
                 .show(ctx, |ui| {
                     ui.label("Are you sure you want to reset?");
-                    ui.horizontal(|ui| unsafe {
+                    ui.horizontal(|ui| {
                         if ui.button("Yes").clicked() {
                             // Delete Database in SQLite
                             info!("Resetting database");

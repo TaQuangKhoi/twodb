@@ -4,10 +4,8 @@ use std::env::var;
 use std::thread;
 use egui::Align2;
 use log::info;
-use postgres::Row;
 use crate::action::move_data::move_one_table;
-use crate::action::working_database::get_rows;
-use crate::core::get_knowledge::{get_tables, get_tables_of_database, get_tables_with_condition};
+use crate::core::get_knowledge::{get_tables_with_condition};
 /// Render the menu bar
 
 use crate::TwoDBApp;
@@ -27,7 +25,7 @@ impl TwoDBApp {
                 thread::spawn(move || {
                     let source_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
 
-                    let tables_from_sqlite = get_tables_with_condition(&source_database_name,
+                    let tables_from_sqlite = get_tables_with_condition(
                     " WHERE database = 'mes' and is_exported = 0 and row_count > 0"
                     );
                     info!("Tables from sqlite: {:?}", tables_from_sqlite);
@@ -42,7 +40,7 @@ impl TwoDBApp {
         });
 
 
-        /// Window Move One Table
+        // Window Move One Table
         if self.windows_state.window_move_one_table_open {
             egui::Window::new("Choose a table")
                 .open(&mut self.windows_state.window_move_one_table_open)

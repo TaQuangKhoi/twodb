@@ -1,5 +1,4 @@
-use egui::TextBuffer;
-use rusqlite::{Connection, MappedRows, params, Row};
+use rusqlite::{Connection, params};
 use crate::core::SQLITE_DATABASE_PATH;
 use crate::core::table::{ExportComplexityType, Table, TableType};
 
@@ -75,7 +74,7 @@ pub fn get_tables_of_database(database_name: &String) -> Vec<Table>
     result
 }
 
-pub fn get_tables_with_condition(database_name: &String, condition: &str) -> Vec<Table>
+pub fn get_tables_with_condition(condition: &str) -> Vec<Table>
 {
     let sqlite_conn = Connection::open(SQLITE_DATABASE_PATH).unwrap();
     let query = String::from(SELECT_PART) + condition;

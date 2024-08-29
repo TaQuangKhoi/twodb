@@ -1,4 +1,3 @@
-use std::clone::Clone;
 /// SQL dialect: PostgreSQL
 pub fn query_get_self_references_tables() -> &'static str {
     let query = "

@@ -1,5 +1,3 @@
-use std::any::Any;
-use std::collections::HashMap;
 use std::env::var;
 use std::time::SystemTime;
 use log::{error, info};
@@ -12,17 +10,17 @@ const SQLITE_DATABASE_PATH: &str = "twodb.db";
 
 /// Compare two databases (PostgreSQL)
 fn compare_database() {
-    let source_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
-    let target_database_name = var("POSTGRES_DB_TARGET").unwrap_or(String::from(""));
-    let mut source_client = connect(source_database_name.clone()).unwrap();
-    let mut target_client = connect(target_database_name.clone()).unwrap();
+    let source_pg_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
+    let target_pg_database_name = var("POSTGRES_DB_TARGET").unwrap_or(String::from(""));
+    let mut source_pg_client = connect(source_pg_database_name.clone()).unwrap();
+    let mut target_pg_client = connect(target_pg_database_name.clone()).unwrap();
 
     let tables_to_compare = get_tables();
 
     for table in tables_to_compare {
         let table_name = table.name.clone();
-        let source_rows = get_rows(&source_database_name, &table_name);
-        let target_rows = get_rows(&source_database_name, &table_name);
+        let source_rows = get_rows(&source_pg_database_name, &table_name);
+        let target_rows = get_rows(&source_pg_database_name, &table_name);
 
         let source_rows_count = source_rows.len();
         let target_rows_count = target_rows.len();
