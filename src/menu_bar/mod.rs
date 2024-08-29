@@ -57,6 +57,9 @@ impl TwoDBApp {
                         info!("Table name: {}", self.table_name);
                         move_one_table(self.table_name.clone());
                     }
+                    if ui.button("Build Query!").clicked() {
+                        info!("Table name: {}", self.table_name);
+                    }
                 });
         }
     }
