@@ -26,7 +26,7 @@ impl TwoDBApp {
                     let source_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
 
                     let tables_from_sqlite = get_tables_with_condition(
-                    " WHERE database = 'mes' and is_exported = 0 and row_count > 0"
+                    " WHERE database = 'mes' and is_exported = 0"
                     );
                     info!("Tables from sqlite: {:?}", tables_from_sqlite);
                     for table in tables_from_sqlite {
