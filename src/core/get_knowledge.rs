@@ -77,7 +77,7 @@ pub fn get_tables_of_database(database_name: &String) -> Vec<Table>
 pub fn get_tables_with_condition(condition: &str) -> Vec<Table>
 {
     let sqlite_conn = Connection::open(SQLITE_DATABASE_PATH).unwrap();
-    let query = String::from(SELECT_PART) + condition;
+    let query = String::from(SELECT_PART) + " " + condition;
     let mut stmt = sqlite_conn.prepare(&*query).unwrap();
 
     println!("Query: {}", query);
