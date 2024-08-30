@@ -137,8 +137,9 @@ pub fn get_cell_value_by_column_name(row: &Row, column_name: String) -> String {
             if value.is_none() {
                 return TWODB_NULL.to_string();
             }
-            value.unwrap_or(SystemTime::UNIX_EPOCH)
-                .duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs().to_string()
+            use chrono::prelude::{DateTime, Utc};
+            let dt: DateTime<Utc> = value.clone().unwrap().into();
+            dt.to_rfc3339()
         }
         "numeric" => {
             let value: Option<f64> = row.try_get(column.name()).unwrap_or(None);
