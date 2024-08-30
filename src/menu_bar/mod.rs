@@ -4,7 +4,7 @@ use std::env::var;
 use std::thread;
 use egui::Align2;
 use log::info;
-use crate::action::move_data::move_one_table;
+use crate::action::move_data::{get_queries_one_table, move_one_table};
 use crate::core::get_knowledge::{get_tables_with_condition};
 /// Render the menu bar
 
@@ -59,6 +59,7 @@ impl TwoDBApp {
                     }
                     if ui.button("Build Query!").clicked() {
                         info!("Table name: {}", self.table_name);
+                        get_queries_one_table(&self.table_name);
                     }
                 });
         }

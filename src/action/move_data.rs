@@ -48,6 +48,15 @@ fn prepare_queries(table_name: &String, rows: &Vec<Row>) -> Vec<String>{
     queries
 }
 
+pub fn get_queries_one_table(table_name: &String) {
+    let source_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
+    let source_rows: Vec<Row> = get_rows(&source_database_name, &table_name);
+    let queries: Vec<String> = prepare_queries(table_name, &source_rows);
+    for query in queries {
+        info!("Query: {:?}", query);
+    }
+}
+
 pub fn move_one_table(table_name: String) {
     let source_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
     let target_database_name = var("POSTGRES_DB_TARGET").unwrap_or(String::from(""));
@@ -90,6 +99,8 @@ pub fn move_one_table(table_name: String) {
 
     for query in queries {
         info!("Query: {:?}", query);
+
+        // Run query
         match pg_client.query(&query, &[]) {
             Ok(_) => {
                 info!("Query executed successfully");
