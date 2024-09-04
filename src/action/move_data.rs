@@ -4,6 +4,7 @@ use postgres::{Column, Row};
 use postgres::error::DbError;
 use crate::action::TWODB_NULL;
 use crate::action::working_database::{get_cell_value_by_column_name, get_rows};
+use crate::core::get_knowledge::get_constraint_table;
 use crate::core::table::Table;
 use crate::database::pg_connect;
 
