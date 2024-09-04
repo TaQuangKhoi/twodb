@@ -1,6 +1,7 @@
 use std::env::var;
 use log::{error, info};
 use postgres::{Column, Row};
+use postgres::error::DbError;
 use crate::action::TWODB_NULL;
 use crate::action::working_database::{get_cell_value_by_column_name, get_rows};
 use crate::core::table::Table;
@@ -13,7 +14,7 @@ fn set_table_is_exported(table_name: &String, is_exported: bool) {
     default_table.update_is_exported();
 }
 
-fn check_if_table_existed_in_db(database_name: &String, table_name: &String) -> bool{
+fn check_if_table_existed_in_db(database_name: &String, table_name: &String) -> bool {
     // Check if the table is existed in the target database
     let mut pg_client = pg_connect(database_name).unwrap();
     let query_check_table_existed = format!("
@@ -34,7 +35,7 @@ fn check_if_table_existed_in_db(database_name: &String, table_name: &String) -> 
     row.get(0)
 }
 
-fn prepare_queries(table_name: &String, rows: &Vec<Row>) -> Vec<String>{
+fn prepare_queries(table_name: &String, rows: &Vec<Row>) -> Vec<String> {
     let mut queries: Vec<String> = Vec::new();
     // STEP 2: Insert data into target database
     for source_row in rows {
@@ -94,7 +95,7 @@ pub fn move_one_table(table_name: String) {
     // len
     info!("Queries len: {:?}", queries.len());
     let mut failed_queries: Vec<String> = Vec::new();
-    
+
     let mut pg_client = pg_connect(&target_database_name).unwrap();
 
     for query in queries {
@@ -108,7 +109,10 @@ pub fn move_one_table(table_name: String) {
             }
             Err(err) => {
                 failed_queries.push(query);
-                error!("Error when insert : {:?}", err);
+                let err: &DbError = err.as_db_error().unwrap();
+                let table_name = err.table().unwrap();
+                let constraint = err.constraint().unwrap();
+                error!("Error when migrate data to table: {} by constraint: {} \n Error: {:?}", table_name, constraint, err);
             }
         };
     }
