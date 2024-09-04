@@ -49,13 +49,23 @@ pub fn get_tables() -> Vec<Table> {
 
 pub fn get_constraint_table(database_name: &String, constraint: &str) -> String {
     let mut pg_client = pg_connect(database_name).unwrap();
-    let query = format!("SELECT * FROM information_schema.table_constraints WHERE constraint_name = '{}'", constraint);
+    let query = format!("
+    SELECT
+        conname AS constraint_name,
+        conrelid::regclass AS table_name,
+        confrelid::regclass::text AS referenced_table_name
+    FROM
+        pg_constraint
+    WHERE
+        contype = 'f'
+        AND conname = '{}';", constraint);
     info!("Query: {}", query);
+
     match pg_client.query (&query, &[]) {
         Ok(rows) => {
             debug!("Rows: {:?}", rows);
             let row = rows.get(0).unwrap();
-            let table_name: String = row.get("table_name");
+            let table_name: String = row.get("referenced_table_name");
             table_name
         },
         Err(err) => {
