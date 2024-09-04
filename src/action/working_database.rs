@@ -122,14 +122,23 @@ pub fn get_cell_value_by_column_name(row: &Row, column_name: String) -> String {
         }
         "int4" => {
             let value: Option<i32> = row.try_get(column.name()).unwrap_or(None);
+            if value.is_none() {
+                return TWODB_NULL.to_string();
+            }
             value.unwrap_or(0).to_string()
         }
         "varchar" => {
             let value: Option<&str> = row.try_get(column.name()).unwrap_or(None);
+            if value.is_none() {
+                return TWODB_NULL.to_string();
+            }
             value.unwrap_or("None").to_string()
         }
         "bool" => {
             let value: Option<bool> = row.try_get(column.name()).unwrap_or(None);
+            if value.is_none() {
+                return TWODB_NULL.to_string();
+            }
             value.unwrap_or(false).to_string()
         }
         "timestamp" => {
@@ -150,10 +159,16 @@ pub fn get_cell_value_by_column_name(row: &Row, column_name: String) -> String {
         }
         "text" => {
             let value: Option<&str> = row.try_get(column.name()).unwrap_or(None);
+            if value.is_none() {
+                return TWODB_NULL.to_string();
+            }
             value.unwrap_or("None").to_string()
         }
         "date" => {
             let value: Option<NaiveDate> = row.try_get(column.name()).unwrap_or(None);
+            if value.is_none() {
+                return TWODB_NULL.to_string();
+            }
             value.unwrap_or(NaiveDate::from_ymd_opt(1970, 1, 1).unwrap()).to_string()
         }
         _ => {
