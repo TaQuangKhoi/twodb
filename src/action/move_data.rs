@@ -113,6 +113,8 @@ pub fn move_one_table(table_name: String) {
                 let table_name = err.table().unwrap();
                 let constraint = err.constraint().unwrap();
                 error!("Error when migrate data to table: {} by constraint: {} \n Error: {:?}", table_name, constraint, err);
+                let constraint_table = get_constraint_table(&target_database_name, constraint);
+                info!("Constraint table: {:?}", constraint_table);
             }
         };
     }
