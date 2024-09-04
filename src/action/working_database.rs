@@ -45,6 +45,8 @@ fn compare_database() {
 
 pub fn get_rows(database_name: &String, table_name: &String) -> Vec<Row>
 {
+    // TODO: Check if table empty (no records)
+
     let mut pg_client = pg_connect(database_name).unwrap();
     let query = "SELECT * FROM ".to_string() + table_name.as_str();
     let rows = match pg_client.query(&query, &[]) {
