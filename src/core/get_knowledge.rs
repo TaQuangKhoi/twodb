@@ -1,6 +1,8 @@
+use log::{debug, error, info};
 use rusqlite::{Connection, params};
 use crate::core::SQLITE_DATABASE_PATH;
 use crate::core::table::{ExportComplexityType, Table, TableType};
+use crate::database::pg_connect;
 
 const SELECT_PART: &str = "SELECT
             id,
@@ -43,6 +45,24 @@ pub fn get_tables() -> Vec<Table> {
         result.push(inner_table);
     }
     result
+}
+
+pub fn get_constraint_table(database_name: &String, constraint: &str) -> String {
+    let mut pg_client = pg_connect(database_name).unwrap();
+    let query = format!("SELECT * FROM information_schema.table_constraints WHERE constraint_name = '{}'", constraint);
+    info!("Query: {}", query);
+    match pg_client.query (&query, &[]) {
+        Ok(rows) => {
+            debug!("Rows: {:?}", rows);
+            let row = rows.get(0).unwrap();
+            let table_name: String = row.get("table_name");
+            table_name
+        },
+        Err(err) => {
+            error!("Error: {:?}", err);
+            String::from("")
+        }
+    }
 }
 
 pub fn get_tables_of_database(database_name: &String) -> Vec<Table>
