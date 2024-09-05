@@ -111,6 +111,8 @@ pub fn move_one_table(table_name: String) {
 
     let mut pg_client = pg_connect(&target_database_name).unwrap();
 
+    // TODO: Disable trigger before insert data
+
     for query in queries {
         info!("Query: {:?}", query);
 
@@ -122,9 +124,15 @@ pub fn move_one_table(table_name: String) {
             }
             Err(err) => {
                 failed_queries.push(query);
-                error!("Error when migrate data to table: {} \n Error: {:?}", table_name, err);
+                // error!("Error when migrate data to table: {} \n Error: {:?}", table_name, err);
 
-                // let err: &DbError = err.as_db_error().unwrap();
+                let err: &DbError = err.as_db_error().unwrap();
+                let detail = err.detail().unwrap(); // "Key (document_id)=(55) is not present in table \"materialflowresources_document\"."
+                let table_ref = detail.split(" ").last().unwrap().replace("\"", "");
+                let table_ref = table_ref.trim_end_matches('.').to_string();
+
+                move_one_table(table_ref);
+
                 // let table_name = err.table().unwrap();
                 // let constraint = err.constraint().unwrap();
                 // error!("Error when migrate data to table: {} by constraint: {} \n Error: {:?}", table_name, constraint, err);
