@@ -1,6 +1,6 @@
 use rusqlite::{Connection, params};
 use crate::core::database::pg_connect;
-use crate::postgresql_queries::query_get_self_references_by_table;
+use crate::core::postgresql_queries::query_get_self_references_by_table;
 use crate::core::sqlite_queries::query_update_row_count;
 
 const SQLITE_DATABASE_PATH: &str = "twodb.db";

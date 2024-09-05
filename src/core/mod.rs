@@ -5,6 +5,7 @@ pub mod table;
 mod sqlite_queries;
 pub(crate) mod reset_knowledge;
 pub mod database;
+pub mod postgresql_queries;
 
 pub const SQLITE_DATABASE_PATH: &str = "twodb.db";
 
