@@ -191,27 +191,4 @@ pub fn get_cell_value_by_column_name(table_name: &String, row: &Row, column_name
     }
 }
 
-fn run_database(database_name: String) {
-    let mut client = match pg_connect(&database_name) {
-        Ok(client) => client,
-        Err(err) => {
-            error!("Error: {}", err);
-            return;
-        }
-    };
-
-    let table_name = var("TABLE_NAME").unwrap_or(String::from(""));
-    let query = "SELECT * FROM ".to_string() + table_name.as_str();
-    let rows = client.query(
-        &query,
-        &[],
-    ).unwrap();
-
-    for row in rows {
-        info!("{}", _row_to_string(&row));
-    }
-
-    client.close().unwrap();
-}
-
 pub fn different_row_count() {}
