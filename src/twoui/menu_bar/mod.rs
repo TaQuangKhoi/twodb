@@ -5,7 +5,7 @@ use std::env::var;
 use std::thread;
 use egui::Align2;
 use log::info;
-use crate::action::move_data::{get_queries_one_table, move_one_table};
+use crate::action::r#move::{get_queries_one_table, move_one_table};
 use crate::core::get_knowledge::{get_tables_with_condition};
 /// Render the menu bar
 
