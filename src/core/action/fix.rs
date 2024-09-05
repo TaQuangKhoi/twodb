@@ -6,11 +6,13 @@ pub fn fix_numeric() {
     let tables_to_fix = get_tables_numeric_wrong_data();
     info!("Tables to fix length: {}", tables_to_fix.len());
     for table in tables_to_fix {
-        info!("Table: {}", table);
+        fix_numeric_for_one_table(table);
     }
 }
 
-pub fn fix_numeric_for_one_table() {}
+pub fn fix_numeric_for_one_table(table_name: String) {
+    info!("Fixing table: {}", table_name);
+}
 
 pub fn get_tables_numeric_wrong_data() -> Vec<String> {
     let source_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));

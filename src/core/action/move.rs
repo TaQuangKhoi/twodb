@@ -1,10 +1,10 @@
 use std::env::var;
-use log::{info};
-use postgres::{Row};
+use log::info;
+use postgres::Row;
 use postgres::error::DbError;
-use crate::core::action::TWODB_NULL;
+use crate::core::action::{check, TWODB_NULL};
 use crate::core::action::working_database::{get_cell_value_by_column_name, get_rows};
-use crate::core::get_knowledge::{get_columns};
+use crate::core::get_knowledge::get_columns;
 use crate::core::table::Table;
 use crate::core::TwoColumn;
 use crate::core::database::pg_connect;
@@ -14,27 +14,6 @@ fn set_table_is_exported(table_name: &String, is_exported: bool) {
     default_table.name = table_name.clone();
     default_table.is_exported = is_exported;
     default_table.update_is_exported();
-}
-
-fn check_if_table_existed_in_db(database_name: &String, table_name: &String) -> bool {
-    // Check if the table is existed in the target database
-    let mut pg_client = pg_connect(database_name).unwrap();
-    let query_check_table_existed = format!("
-        SELECT EXISTS (
-          SELECT 1
-          FROM pg_tables
-          WHERE schemaname = 'public'
-            AND tablename = '{}'
-        );", table_name);
-    let rows = match pg_client.query(&query_check_table_existed, &[]) {
-        Ok(rows) => rows,
-        Err(err) => {
-            info!("Error querying : {:?}", err);
-            return false;
-        }
-    };
-    let row = rows.get(0).unwrap();
-    row.get(0)
 }
 
 fn prepare_queries(table_name: &String, rows: &Vec<Row>) -> Vec<String> {
@@ -96,7 +75,7 @@ pub fn move_one_table(table_name: String) {
         return;
     }
 
-    if !check_if_table_existed_in_db(&target_database_name, &table_name) {
+    if !check::check_if_table_existed_in_db(&target_database_name, &table_name) {
         set_table_is_exported(&table_name, true);
         info!("Table: {} does not exist in the target database", table_name);
         return;

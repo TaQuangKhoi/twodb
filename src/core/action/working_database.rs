@@ -5,7 +5,6 @@ use log::{error, info};
 use postgres::error::SqlState;
 use postgres::{Column, Row};
 use crate::core::action::TWODB_NULL;
-use crate::core::get_knowledge::get_tables;
 use crate::core::database::pg_connect;
 
 pub fn get_rows(database_name: &String, table_name: &String) -> Vec<Row> {
