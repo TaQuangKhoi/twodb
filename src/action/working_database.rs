@@ -6,7 +6,7 @@ use postgres::error::SqlState;
 use postgres::{Column, Row};
 use crate::action::TWODB_NULL;
 use crate::core::get_knowledge::get_tables;
-use crate::database::pg_connect;
+use crate::core::database::pg_connect;
 
 /// Compare two databases (PostgreSQL)
 fn compare_database() {

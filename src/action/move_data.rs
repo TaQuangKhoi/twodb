@@ -7,7 +7,7 @@ use crate::action::working_database::{get_cell_value_by_column_name, get_rows};
 use crate::core::get_knowledge::{get_columns};
 use crate::core::table::Table;
 use crate::core::TwoColumn;
-use crate::database::pg_connect;
+use crate::core::database::pg_connect;
 
 fn set_table_is_exported(table_name: &String, is_exported: bool) {
     let mut default_table = Table::default();

@@ -2,7 +2,7 @@
 
 use rusqlite::Connection;
 use crate::core::table::{build_base_simple_table, create_tables_table, insert_new_table, Table};
-use crate::database::pg_connect;
+use crate::core::database::pg_connect;
 use crate::postgresql_queries::query_get_self_references_tables;
 
 const SQLITE_DATABASE_PATH: &str = "twodb.db";

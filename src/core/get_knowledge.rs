@@ -2,7 +2,7 @@ use log::{debug, error, info};
 use rusqlite::{Connection, params};
 use crate::core::{SQLITE_DATABASE_PATH, TwoColumn};
 use crate::core::table::{ExportComplexityType, Table, TableType};
-use crate::database::pg_connect;
+use crate::core::database::pg_connect;
 
 const SELECT_PART: &str = "SELECT
             id,
