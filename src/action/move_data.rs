@@ -152,11 +152,11 @@ fn build_insert_query_2(table_name: &String, columns: &Vec<&TwoColumn>, row: &Ro
     let values_str = columns.iter().map(
         |c|
         {
-            let value = get_cell_value_by_column_name(row, c.name.clone());
+            let value = get_cell_value_by_column_name(table_name, row, c.name.clone());
             if value == TWODB_NULL {
                 return "NULL".to_string();
             }
-            format!("'{}'", get_cell_value_by_column_name(row, c.name.clone()))
+            format!("'{}'", get_cell_value_by_column_name(table_name, row, c.name.clone()))
         }
     ).collect::<Vec<_>>().join(", ");
     format!("INSERT INTO {} ({}) VALUES ({})", table_name, columns_str, values_str)

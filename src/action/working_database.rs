@@ -109,7 +109,7 @@ pub fn get_cells(row: &Row) -> Vec<String> {
     cells
 }
 
-pub fn get_cell_value_by_column_name(row: &Row, column_name: String) -> String {
+pub fn get_cell_value_by_column_name(table_name: &String, row: &Row, column_name: String) -> String {
     let columns: &[Column] = row.columns();
     let column = columns.iter().find(|column| column.name() == column_name.clone()).unwrap();
     let type_ = column.type_();
@@ -152,13 +152,24 @@ pub fn get_cell_value_by_column_name(row: &Row, column_name: String) -> String {
             let dt: DateTime<Utc> = value.clone().unwrap().into();
             dt.to_rfc3339()
         }
+
+        // This datatype is not supported by crate postgres
         "numeric" => {
-            let value: Option<f64> = row.try_get(column.name()).unwrap_or(None);
+            // Code chữa cháy, code này chạy cực lâu
+            let column_name = column.name();
+            let row_id: i64 = row.try_get("id").unwrap_or(0);
+            let source_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
+            let mut pg_client = pg_connect(&source_database_name).unwrap();
+            let query = format!("SELECT {}::text FROM {} WHERE id = {}", column_name, table_name, row_id);
+            let rows = pg_client.query(&query, &[]).unwrap();
+            let row = rows.get(0).unwrap();
+            let value: Option<&str> = row.try_get(0).unwrap_or(None);
             if value.is_none() {
                 return TWODB_NULL.to_string();
             }
-            value.unwrap_or(0.0).to_string()
+            value.unwrap_or("0.0").to_string()
         }
+
         "text" => {
             let value: Option<&str> = row.try_get(column.name()).unwrap_or(None);
             if value.is_none() {
