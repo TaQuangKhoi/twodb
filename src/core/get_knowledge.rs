@@ -146,9 +146,9 @@ pub fn get_tables_with_condition(condition: &str) -> Vec<Table>
     let query = String::from(SELECT_PART) + " " + condition;
     let mut stmt = sqlite_conn.prepare(&*query).unwrap();
 
-    println!("Query: {}", query);
+    // println!("Query: {}", query);
     let tables_iter = stmt.query_map([], |row| {
-        println!("Row: {:?}", row);
+        // println!("Row: {:?}", row);
         Ok(Table {
             id: row.get(0)?,
             name: row.get(1)?,
