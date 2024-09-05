@@ -8,43 +8,7 @@ use crate::action::TWODB_NULL;
 use crate::core::get_knowledge::get_tables;
 use crate::core::database::pg_connect;
 
-/// Compare two databases (PostgreSQL)
-fn compare_database() {
-    let source_pg_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
-    let target_pg_database_name = var("POSTGRES_DB_TARGET").unwrap_or(String::from(""));
-    let _source_pg_client = pg_connect(&source_pg_database_name).unwrap();
-    let _target_pg_client = pg_connect(&target_pg_database_name).unwrap();
-
-    let tables_to_compare = get_tables();
-
-    for table in tables_to_compare {
-        let table_name = table.name.clone();
-        let source_rows = get_rows(&source_pg_database_name, &table_name);
-        let target_rows = get_rows(&source_pg_database_name, &table_name);
-
-        let source_rows_count = source_rows.len();
-        let target_rows_count = target_rows.len();
-        if source_rows_count != target_rows_count {
-            info!("Table: {} has different rows count: {} vs {}", table_name, source_rows_count, target_rows_count);
-            continue;
-        }
-
-        for (source_row, target_row) in source_rows.iter().zip(target_rows.iter()) {
-            let source_cells = get_cells(source_row);
-
-            let target_cells = get_cells(target_row);
-
-            if source_cells != target_cells {
-                info!("Table: {} has different cells", table_name);
-                info!("Source: {:?}", source_cells);
-                info!("Target: {:?}", target_cells);
-            }
-        }
-    }
-}
-
-pub fn get_rows(database_name: &String, table_name: &String) -> Vec<Row>
-{
+pub fn get_rows(database_name: &String, table_name: &String) -> Vec<Row> {
     // TODO: Check if table empty (no records)
 
     let mut pg_client = pg_connect(database_name).unwrap();
