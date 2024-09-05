@@ -90,20 +90,17 @@ pub fn get_columns(database_name: &String, table_name: &String) -> Vec<TwoColumn
         information_schema.columns
     WHERE
         table_name = '{}';", table_name);
-    info!("Query: {}", query);
 
     let mut columns = Vec::new();
 
     match pg_client.query (&query, &[]) {
         Ok(rows) => {
-            debug!("Rows: {:?}", rows);
             for row in rows {
                 let column: TwoColumn = TwoColumn {
                     name: row.get("column_name"),
                     data_type: row.get("data_type"),
                 };
                 let is_nullable: String = row.get("is_nullable");
-                info!("Column: {}, {}, {}", column.name, column.data_type, is_nullable);
                 &columns.push(column);
             }
             columns

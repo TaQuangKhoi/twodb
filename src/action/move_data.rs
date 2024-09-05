@@ -39,14 +39,23 @@ fn check_if_table_existed_in_db(database_name: &String, table_name: &String) -> 
 
 fn prepare_queries(table_name: &String, rows: &Vec<Row>) -> Vec<String> {
     let mut queries: Vec<String> = Vec::new();
+
     let source_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
-    let columns_2 = get_columns(&source_database_name, table_name);
+    let columns_source = get_columns(&source_database_name, table_name);
+
+    let target_database_name = var("POSTGRES_DB_TARGET").unwrap_or(String::from(""));
+    let columns_target = get_columns(&target_database_name, table_name);
+
+    let final_columns = columns_target.iter().filter(|c| {
+        columns_source.iter().any(|c2| c2.name == c.name)
+    }).collect::<Vec<_>>();
+    info!("Final columns: {:?}", final_columns);
 
     // STEP 2: Insert data into target database
     for source_row in rows {
         // TODO: Build columns that have in source db only
 
-        let query: String = build_insert_query_2(table_name, &columns_2, source_row);
+        let query: String = build_insert_query_2(table_name, &final_columns, source_row);
         queries.push(query);
     }
 
@@ -130,7 +139,7 @@ pub fn move_one_table(table_name: String) {
     }
 }
 
-fn build_insert_query_2(table_name: &String, columns: &Vec<TwoColumn>, row: &Row) -> String {
+fn build_insert_query_2(table_name: &String, columns: &Vec<&TwoColumn>, row: &Row) -> String {
     let columns_str = columns.iter().map(|c| c.name.clone()).collect::<Vec<_>>().join(", ");
     let values_str = columns.iter().map(
         |c|
