@@ -5,7 +5,6 @@ pub use app::TwoDBApp;
 mod core;
 mod postgresql_queries;
 mod app_fn_impl;
-mod preparation;
 mod action;
 mod state;
 mod twoui;
