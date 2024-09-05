@@ -4,7 +4,7 @@ use postgres::{Column, Row};
 use postgres::error::DbError;
 use crate::action::TWODB_NULL;
 use crate::action::working_database::{get_cell_value_by_column_name, get_rows};
-use crate::core::get_knowledge::get_constraint_table;
+use crate::core::get_knowledge::{get_columns, get_constraint_table};
 use crate::core::table::Table;
 use crate::database::pg_connect;
 
@@ -38,6 +38,8 @@ fn check_if_table_existed_in_db(database_name: &String, table_name: &String) -> 
 
 fn prepare_queries(table_name: &String, rows: &Vec<Row>) -> Vec<String> {
     let mut queries: Vec<String> = Vec::new();
+    let target_database_name = var("POSTGRES_DB_TARGET").unwrap_or(String::from(""));
+    get_columns(&target_database_name, &table_name);
     // STEP 2: Insert data into target database
     for source_row in rows {
         // TODO: Build columns that have in source db only
@@ -110,12 +112,14 @@ pub fn move_one_table(table_name: String) {
             }
             Err(err) => {
                 failed_queries.push(query);
-                let err: &DbError = err.as_db_error().unwrap();
-                let table_name = err.table().unwrap();
-                let constraint = err.constraint().unwrap();
-                error!("Error when migrate data to table: {} by constraint: {} \n Error: {:?}", table_name, constraint, err);
-                let constraint_table = get_constraint_table(&target_database_name, constraint);
-                info!("Constraint table: {:?}", constraint_table);
+                error!("Error when migrate data to table: {} \n Error: {:?}", table_name, err);
+
+                // let err: &DbError = err.as_db_error().unwrap();
+                // let table_name = err.table().unwrap();
+                // let constraint = err.constraint().unwrap();
+                // error!("Error when migrate data to table: {} by constraint: {} \n Error: {:?}", table_name, constraint, err);
+                // let constraint_table = get_constraint_table(&target_database_name, constraint);
+                // info!("Constraint table: {:?}", constraint_table);
             }
         };
     }

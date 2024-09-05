@@ -75,6 +75,41 @@ pub fn get_constraint_table(database_name: &String, constraint: &str) -> String 
     }
 }
 
+pub fn get_columns(database_name: &String, table_name: &String) {
+    let mut pg_client = pg_connect(database_name).unwrap();
+    let query = format!("
+    SELECT
+        column_name,
+        data_type,
+        character_maximum_length,
+        numeric_precision,
+        numeric_scale,
+        is_nullable
+    FROM
+        information_schema.columns
+    WHERE
+        table_name = '{}';", table_name);
+    info!("Query: {}", query);
+
+    match pg_client.query (&query, &[]) {
+        Ok(rows) => {
+            debug!("Rows: {:?}", rows);
+            for row in rows {
+                let column_name: String = row.get("column_name");
+                let data_type: String = row.get("data_type");
+                // let character_maximum_length: i32 = row.get("character_maximum_length");
+                // let numeric_precision: i32 = row.get("numeric_precision");
+                // let numeric_scale: i32 = row.get("numeric_scale");
+                let is_nullable: String = row.get("is_nullable");
+                info!("Column: {}, {}, {}", column_name, data_type, is_nullable);
+            }
+        },
+        Err(err) => {
+            error!("Error: {:?}", err);
+        }
+    }
+}
+
 pub fn get_tables_of_database(database_name: &String) -> Vec<Table>
 {
     let sqlite_conn = Connection::open(SQLITE_DATABASE_PATH).unwrap();
