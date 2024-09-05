@@ -111,6 +111,7 @@ impl eframe::App for TwoDBApp {
                     });
                     self.menu_btn_migrate_data_render(ctx, ui);
                     self.menu_btn_reset_render(ctx, ui);
+                    self.menu_btn_fix_render(ctx, ui);
                     ui.menu_button("Settings", |_| {});
 
                     if self.is_busy.lock().unwrap().clone() {

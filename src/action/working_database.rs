@@ -1,7 +1,7 @@
 use std::env::var;
 use std::time::SystemTime;
 use chrono::NaiveDate;
-use log::{debug, error, info};
+use log::{error, info};
 use postgres::error::SqlState;
 use postgres::{Column, Row};
 use crate::action::TWODB_NULL;

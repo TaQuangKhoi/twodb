@@ -1,10 +1,10 @@
 use std::env::var;
-use log::{debug, error, info};
-use postgres::{Column, Row};
+use log::{info};
+use postgres::{Row};
 use postgres::error::DbError;
 use crate::action::TWODB_NULL;
 use crate::action::working_database::{get_cell_value_by_column_name, get_rows};
-use crate::core::get_knowledge::{get_columns, get_constraint_table};
+use crate::core::get_knowledge::{get_columns};
 use crate::core::table::Table;
 use crate::core::TwoColumn;
 use crate::database::pg_connect;

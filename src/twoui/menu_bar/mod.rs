@@ -1,4 +1,5 @@
 mod menu_btn_reset;
+mod menu_btn_fix;
 
 use std::env::var;
 use std::thread;

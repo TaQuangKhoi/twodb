@@ -1,5 +1,4 @@
 use log::{debug, error, info};
-use postgres::Column;
 use rusqlite::{Connection, params};
 use crate::core::{SQLITE_DATABASE_PATH, TwoColumn};
 use crate::core::table::{ExportComplexityType, Table, TableType};
@@ -100,7 +99,7 @@ pub fn get_columns(database_name: &String, table_name: &String) -> Vec<TwoColumn
                     name: row.get("column_name"),
                     data_type: row.get("data_type"),
                 };
-                let is_nullable: String = row.get("is_nullable");
+                let _is_nullable: String = row.get("is_nullable");
                 &columns.push(column);
             }
             columns
