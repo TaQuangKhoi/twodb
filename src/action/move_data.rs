@@ -1,11 +1,12 @@
 use std::env::var;
-use log::{error, info};
+use log::{debug, error, info};
 use postgres::{Column, Row};
 use postgres::error::DbError;
 use crate::action::TWODB_NULL;
 use crate::action::working_database::{get_cell_value_by_column_name, get_rows};
 use crate::core::get_knowledge::{get_columns, get_constraint_table};
 use crate::core::table::Table;
+use crate::core::TwoColumn;
 use crate::database::pg_connect;
 
 fn set_table_is_exported(table_name: &String, is_exported: bool) {
@@ -38,14 +39,14 @@ fn check_if_table_existed_in_db(database_name: &String, table_name: &String) -> 
 
 fn prepare_queries(table_name: &String, rows: &Vec<Row>) -> Vec<String> {
     let mut queries: Vec<String> = Vec::new();
-    let target_database_name = var("POSTGRES_DB_TARGET").unwrap_or(String::from(""));
-    get_columns(&target_database_name, &table_name);
+    let source_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
+    let columns_2 = get_columns(&source_database_name, table_name);
+
     // STEP 2: Insert data into target database
     for source_row in rows {
         // TODO: Build columns that have in source db only
-        let columns: &[Column] = source_row.columns();
 
-        let query: String = build_insert_query(&table_name, columns, &source_row);
+        let query: String = build_insert_query_2(table_name, &columns_2, source_row);
         queries.push(query);
     }
 
@@ -129,16 +130,16 @@ pub fn move_one_table(table_name: String) {
     }
 }
 
-fn build_insert_query(table_name: &String, columns: &[Column], row: &Row) -> String {
-    let columns_str = columns.iter().map(|c| c.name()).collect::<Vec<_>>().join(", ");
+fn build_insert_query_2(table_name: &String, columns: &Vec<TwoColumn>, row: &Row) -> String {
+    let columns_str = columns.iter().map(|c| c.name.clone()).collect::<Vec<_>>().join(", ");
     let values_str = columns.iter().map(
         |c|
         {
-            let value = get_cell_value_by_column_name(row, c.name().to_string());
+            let value = get_cell_value_by_column_name(row, c.name.clone());
             if value == TWODB_NULL {
                 return "NULL".to_string();
             }
-            format!("'{}'", get_cell_value_by_column_name(row, c.name().to_string()))
+            format!("'{}'", get_cell_value_by_column_name(row, c.name.clone()))
         }
     ).collect::<Vec<_>>().join(", ");
     format!("INSERT INTO {} ({}) VALUES ({})", table_name, columns_str, values_str)

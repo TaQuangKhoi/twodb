@@ -6,3 +6,9 @@ mod sqlite_queries;
 pub(crate) mod reset_knowledge;
 
 pub const SQLITE_DATABASE_PATH: &str = "twodb.db";
+
+#[derive(Debug)]
+pub struct TwoColumn {
+    pub name: String,
+    pub data_type: String,
+}
