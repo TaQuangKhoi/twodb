@@ -16,7 +16,7 @@ fn set_table_is_exported(table_name: &String, is_exported: bool) {
     default_table.update_is_exported();
 }
 
-fn prepare_queries(table_name: &String, rows: &Vec<Row>) -> Vec<String> {
+fn prepare_insert_queries(table_name: &String, rows: &Vec<Row>) -> Vec<String> {
     let mut queries: Vec<String> = Vec::new();
 
     let source_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
@@ -44,7 +44,7 @@ fn prepare_queries(table_name: &String, rows: &Vec<Row>) -> Vec<String> {
 pub fn get_queries_one_table(table_name: &String) {
     let source_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
     let source_rows: Vec<Row> = get_rows(&source_database_name, &table_name);
-    let queries: Vec<String> = prepare_queries(table_name, &source_rows);
+    let queries: Vec<String> = prepare_insert_queries(table_name, &source_rows);
     for query in queries {
         info!("Query: {:?}", query);
     }
@@ -81,7 +81,7 @@ pub fn move_one_table(table_name: String) {
         return;
     }
 
-    let queries: Vec<String> = prepare_queries(&table_name, &source_rows);
+    let queries: Vec<String> = prepare_insert_queries(&table_name, &source_rows);
     // STEP 2: Insert data into target database
 
     // len
