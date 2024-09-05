@@ -35,6 +35,10 @@ impl Default for Table {
     }
 }
 impl Table {
+    pub fn get_table_name_as_str(&self) -> String {
+        self.name.clone()
+    }
+
     pub fn increase_export_order(&mut self) {
         self.export_order += 1;
     }
