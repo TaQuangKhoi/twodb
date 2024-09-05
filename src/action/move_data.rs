@@ -90,7 +90,7 @@ pub fn move_one_table(table_name: String) {
     }
 
     // Case 1: Data has been extracted
-    if target_rows.len() > 0 {
+    if target_rows.len() > 0 && source_rows.len() > 0 && source_rows.len() == target_rows.len() {
         set_table_is_exported(&table_name, true);
         info!("Data has been extracted from source database");
         return;
