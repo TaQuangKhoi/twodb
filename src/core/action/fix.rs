@@ -1,12 +1,13 @@
 use std::env::var;
-use log::info;
+use log::{error, info};
 use postgres::Row;
 use crate::core::action::TWODB_NULL;
 use crate::core::action::working_database::{get_cell_value_by_column_name, get_rows};
+use crate::core::database::pg_connect;
 use crate::core::get_knowledge::{get_columns, get_tables_with_condition};
 
 pub fn fix_numeric() {
-    let tables_to_fix = get_tables_numeric_wrong_data(1);
+    let tables_to_fix = get_tables_numeric_wrong_data(0);
     info!("Tables to fix length: {}", tables_to_fix.len());
     for table in tables_to_fix {
         fix_numeric_for_one_table(table);
@@ -36,24 +37,31 @@ pub fn fix_numeric_for_one_table(table_name: String) {
     // let query_target;
 
     for row in source_rows {
-        // TODO: Build UPDATE SQL for each row
-        let columns_str = final_columns.iter().map(|c| c.name.clone()).collect::<Vec<_>>().join(", ");
-        let values_str = final_columns.iter().map(|c| {
+        let set_pair : Vec<String> = final_columns.iter().map(|c| {
             let value = get_cell_value_by_column_name(&table_name, &row, c.name.clone());
             if value == TWODB_NULL {
-                return "NULL".to_string();
+                return format!("{} = NULL", c.name);
             }
-            format!("'{}'", value)
-        }).collect::<Vec<_>>().join(", ");
-        let query = format!("UPDATE {} SET {} = {} WHERE id = {}",
+            format!("{} = '{}'", c.name, value)
+        }).collect();
+        let id: i64 = row.get("id");
+        // TODO: Build UPDATE SQL for each row
+        let query = format!("UPDATE {} SET {} WHERE id = {}",
                             table_name,
-                            columns_str,
-                            values_str,
-                            get_cell_value_by_column_name(&table_name, &row, "id".to_string()));
+                            set_pair.join(", "),
+                            id.to_string());
         update_queries.push(query);
     }
 
     info!("Queries to update: {:?}", update_queries);
+    // Execute all queries
+    let mut pg_client = pg_connect(&target_database_name).unwrap();
+    for query in update_queries {
+        match pg_client.execute(&query, &[]) {
+            Ok(_) => info!("Run query {} successfully", query),
+            Err(err) => error!("Error updating: {:?}", err)
+        }
+    }
 }
 
 pub fn get_tables_numeric_wrong_data(limit:i8) -> Vec<String> {
@@ -62,13 +70,11 @@ pub fn get_tables_numeric_wrong_data(limit:i8) -> Vec<String> {
     let tables_from_sqlite = get_tables_with_condition(
         &condition
     );
-    info!("Tables from sqlite length: {}", tables_from_sqlite.len());
     let mut tables_to_fix = Vec::new();
 
 
     for table in tables_from_sqlite {
         let table_name = table.name.clone();
-        info!("Checking table: {}", table_name);
         if check_numeric_column(&table_name) {
             tables_to_fix.push(table_name);
         }
