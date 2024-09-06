@@ -34,3 +34,14 @@ pub fn get_tables_numeric_wrong_data() -> Vec<String> {
 
     tables_to_fix
 }
+
+fn check_numeric_column(table_name: &String) -> bool {
+    let source_database_name = var("POSTGRES_DB_SOURCE").unwrap_or(String::from(""));
+    let columns = get_columns(&source_database_name, table_name);
+    for column in columns {
+        if column.data_type == "numeric" {
+            return true;
+        }
+    }
+    false
+}
