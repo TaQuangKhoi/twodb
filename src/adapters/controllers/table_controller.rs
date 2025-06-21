@@ -1,7 +1,6 @@
 /*! This file contains the TableController implementation. */
 
 use crate::application::repositories::table_repository::TableRepository;
-use crate::application::use_cases::move_table_data;
 use crate::domain::table::Table;
 use crate::domain::two_column::TwoColumn;
 

@@ -4,7 +4,6 @@ use std::rc::Rc;
 use log::info;
 use crate::application::repositories::table_repository::TableRepository;
 use crate::application::repositories::knowledge_repository::KnowledgeRepository;
-use crate::domain::table::Table;
 
 /// Service for updating knowledge about empty tables
 pub struct UpdateEmptyTablesKnowledgeService<T: TableRepository, K: KnowledgeRepository> {

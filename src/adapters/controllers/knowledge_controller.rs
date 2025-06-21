@@ -1,7 +1,6 @@
 /*! This file contains the KnowledgeController implementation. */
 
 use crate::application::repositories::knowledge_repository::KnowledgeRepository;
-use crate::application::use_cases::update_empty_tables_knowledge;
 use crate::domain::table::Table;
 
 /// Controller for handling knowledge-related operations
