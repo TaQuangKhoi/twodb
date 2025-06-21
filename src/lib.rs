@@ -8,3 +8,4 @@ mod app_fn_impl;
 mod state;
 mod twoui;
 pub mod application;
+pub mod adapters;
