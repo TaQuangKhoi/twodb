@@ -9,9 +9,3 @@ pub mod postgresql_queries;
 pub mod action;
 
 pub const SQLITE_DATABASE_PATH: &str = "twodb.db";
-
-#[derive(Debug)]
-pub struct TwoColumn {
-    pub name: String,
-    pub data_type: String,
-}

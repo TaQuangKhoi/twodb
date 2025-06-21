@@ -1,8 +1,9 @@
 use log::{debug, error, info};
 use rusqlite::{Connection, params};
-use crate::core::{SQLITE_DATABASE_PATH, TwoColumn};
-use crate::core::table::{ExportComplexityType, Table, TableType};
+use crate::core::SQLITE_DATABASE_PATH;
 use crate::core::database::pg_connect;
+use crate::domain::table::{Table, TableType, ExportComplexityType};
+use crate::domain::two_column::TwoColumn;
 
 const SELECT_PART: &str = "SELECT
             id,
@@ -41,7 +42,7 @@ pub fn get_tables() -> Vec<Table> {
     let mut result = Vec::new();
     for table in tables {
         let mut inner_table = table.unwrap();
-        inner_table.update_row_count(); // Long-running query
+        crate::core::table::update_row_count(&mut inner_table); // Long-running query
         result.push(inner_table);
     }
     result

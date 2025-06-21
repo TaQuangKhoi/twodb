@@ -1,7 +1,8 @@
 /// Update knowledge base about target and source databases
 
 use rusqlite::Connection;
-use crate::core::table::{build_base_simple_table, create_tables_table, insert_new_table, Table};
+use crate::domain::table::Table;
+use crate::core::table::{build_base_simple_table, create_tables_table, insert_new_table, update_table_to_db, update_row_count, update_self_referencing, is_table_exists};
 use crate::core::database::pg_connect;
 use crate::core::postgresql_queries::query_get_self_references_tables;
 
@@ -28,8 +29,8 @@ pub fn update_table_self_references(database_name: &String) {
         table.self_referencing_column = self_referencing_column;
 
         // check if table exists
-        if table.is_table_exists() {
-            table.update_table_to_db();
+        if is_table_exists(&table) {
+            update_table_to_db(&table);
             continue;
         }
 
@@ -61,8 +62,8 @@ pub fn update_empty_tables(database_name: &String) {
         let mut table: Table = build_base_simple_table(table_name, database_name.clone());
 
         // check if table exists, update row count
-        if table.is_table_exists() {
-            table.update_row_count();
+        if is_table_exists(&table) {
+            update_row_count(&mut table);
             continue;
         }
 
@@ -96,9 +97,9 @@ pub fn update_clean_tables(database_name: &String) {
     for row in rows {
         let table_name: String = row.get(0);
         let mut table = build_base_simple_table(table_name, database_name.clone());
-        table.update_row_count();
+        update_row_count(&mut table);
         // check if table exists
-        if table.is_table_exists() {
+        if is_table_exists(&table) {
             continue;
         }
 
@@ -127,12 +128,12 @@ pub fn update_all_tables(database_name: &String) {
         let table_name: String = row.get(0);
 
         let mut table: Table = build_base_simple_table(table_name.clone(), database_name.clone());
-        table.update_self_referencing(database_name);
-        table.update_row_count();
+        update_self_referencing(&mut table, database_name);
+        update_row_count(&mut table);
 
         // check if table exists
-        if table.is_table_exists() {
-            table.update_table_to_db();
+        if is_table_exists(&table) {
+            update_table_to_db(&table);
             continue;
         }
 

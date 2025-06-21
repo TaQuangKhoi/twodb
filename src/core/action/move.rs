@@ -5,15 +5,16 @@ use postgres::error::DbError;
 use crate::core::action::{check, TWODB_NULL};
 use crate::core::action::working_database::{get_cell_value_by_column_name, get_rows};
 use crate::core::get_knowledge::get_columns;
-use crate::core::table::Table;
-use crate::core::TwoColumn;
+use crate::domain::table::Table;
+use crate::domain::two_column::TwoColumn;
 use crate::core::database::pg_connect;
+use crate::core::table::update_is_exported;
 
 fn set_table_is_exported(table_name: &String, is_exported: bool) {
     let mut default_table = Table::default();
     default_table.name = table_name.clone();
     default_table.is_exported = is_exported;
-    default_table.update_is_exported();
+    update_is_exported(&mut default_table);
 }
 
 fn prepare_insert_queries(table_name: &String, rows: &Vec<Row>) -> Vec<String> {
